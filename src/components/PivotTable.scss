@@ -11,13 +11,13 @@ $white: #ffffff;
   $row-dim-final-result__background-color: #333333;
   $col-title-text__color: #b3bed5;
 
-  .TableSubResult {
+  .TableRowSubResult {
     background-color: $row-dim-sub-result__background-color;
     border-top: 1px solid $row-dim-sub-result__border-color;
     border-bottom: 1px solid $row-dim-sub-result__border-color;
   }
 
-  .TableRowDimension {
+  .TableRowDimensions {
     box-shadow: 0px -8px 16px 0px rgba(0, 0, 0, .25);
     width: $row-dim__width;
     grid-template-rows: 50px calc(100% - 100px) 50px;
@@ -26,13 +26,13 @@ $white: #ffffff;
         "row-dimensions"
         "row-total";
     z-index: 10;
-  }
 
-  .TableRowDimensionGroup {
-    grid-area: row-dimensions;
-
-    .TableColumnTitleGroup {
-      background-color: $header__background-color;
+    .TableBody {
+      grid-area: row-dimensions;
+  
+      .TableColumnTitleGroup {
+        background-color: $header__background-color;
+      }
     }
   }
 
@@ -41,7 +41,6 @@ $white: #ffffff;
   }
 
   .TableHeader {
-    display: grid;
     grid-area: row-header;
 
     .TableTitle {
@@ -58,7 +57,7 @@ $white: #ffffff;
     }
   }
 
-  .TableRowDimFinalResult {
+  .TableRowFinalResult {
     background-color: $row-dim-final-result__background-color;
     grid-area: row-total;
 
@@ -67,7 +66,7 @@ $white: #ffffff;
     }
   }
 
-  .TableColumnDimension {
+  .TableColumnDimensions {
     text-align: right;
     width: calc(100% - #{$row-dim__width});
     display: grid;
@@ -79,31 +78,33 @@ $white: #ffffff;
     .TableHeader {
       grid-area: column-header;
     }
-  }
 
-  .TableMetrics {
-    display: grid;
-    grid-area: column-metrics;
-
-    .Cell {
-      text-align: right;
-
-      &:first-of-type {
-        background-color: $header__background-color;
+    .TableBody {
+      display: flex;
+      grid-area: column-metrics;
+  
+      .Cell {
+        text-align: right;
+  
+        &:first-of-type {
+          background-color: $header__background-color;
+        }
       }
     }
   }
 }
 
 .Cell {
+  overflow: hidden;
   text-align: left;
+  text-overflow: ellipsis;
 
   span {
     white-space: nowrap;
   }
 
   &:not(.noPadding) {
-    padding: 1rem;
+    padding: 1rem 1.5rem;
   }
 
   &.CellGroup {

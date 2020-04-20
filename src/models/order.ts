@@ -1,13 +1,17 @@
 import { Record } from 'immutable';
 
-export interface BaseOrderNumProps {
-  rowId: number;
-  postalCode: number;
+export interface QunatifiableProps {
   sales: number;
   quantity: number;
-  discount: number;
   profit: number;
 }
+
+export interface BaseOrderNumProps extends QunatifiableProps {
+  rowId: number;
+  postalCode: number;
+  discount: number;
+}
+
 export interface BaseOrderStringProps {
   orderId: string;
   orderDate: string;

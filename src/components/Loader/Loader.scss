@@ -1,0 +1,35 @@
+@keyframes Flip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    background: #011439;
+  }
+  100% {
+    transform: rotateY(180deg);
+  } }
+
+.Loader {
+  position: absolute;
+  top: calc(50% - 20px);
+  left: calc(50% - 20px);
+}
+
+.LoaderCircle {
+  width: 60px;
+  height: 60px;
+  background: #032873;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+}
+
+.LoaderHalfCircles {
+  width: 30px;
+  height: 60px;
+  display: inline-block;
+  position: absolute;
+  border-radius: 30px 0 0 30px;
+  transform-origin: 30px 0;
+  animation: Flip .75s linear infinite;
+}

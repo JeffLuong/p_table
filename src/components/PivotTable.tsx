@@ -3,14 +3,20 @@ import cx from 'classnames';
 import type { FormattedData } from './ProductSalesByStateTable';
 import './PivotTable.scss';
 
-type TableDefaultProps = {
-  children: React.ReactNode;
-};
-
 type PivotTableProps = {
   data: FormattedData;
-  rowTitle: string;
-  colTitle: string;
+  tableConfig: {
+    rowTitle: string;
+    colTitle: string;
+    rowDimTitle: string;
+    rowDimSubTitle: string;
+    subResultText: string;
+    finalResultText: string;
+  }
+};
+
+type TableDefaultProps = {
+  children: React.ReactNode;
 };
 
 interface TableColDimsWrapperProps extends TableDefaultProps {
@@ -23,27 +29,33 @@ interface CellProps extends TableDefaultProps {
   noPadding?: boolean;
 }
 
+/**
+ * Adds commas `,` in the appropriate locations for a large number.
+ * @param n number
+ * @returns string
+ */
+const prettifyNumber = (n: number): string => {
+  const stringNums = n.toString().split('');
+  return stringNums.map((s, i) => {
+    if ((stringNums.length - i) % 3 === 0) {
+      return i === 0 ? s : `,${s}`;
+    }
+    return s;
+  }).join('');
+};
+
 const Cell = ({ className, isCellGroup, children, noPadding, ...rest }: CellProps): JSX.Element => {
   const classes = cx(
     'Cell',
-    noPadding ? 'noPadding' : '',
     isCellGroup ? 'CellGroup' : '',
+    noPadding ? 'noPadding' : '',
     className
   );
-
-  return (
-    <div className={classes} {...rest}>{children}</div>
-  );
-};
-
-const TableRowDimension = ({ children }: TableDefaultProps): JSX.Element => {
-  return <div className="TableRowDimension">{children}</div>;
+  return <div className={classes} {...rest}>{children}</div>;
 };
 
 const TableHeader = ({ children }: TableDefaultProps): JSX.Element => {
-  return (
-    <div className="TableHeader">{children}</div>
-  );
+  return <div className="TableHeader">{children}</div>;
 };
 
 const TableTitle = ({ children }: TableDefaultProps): JSX.Element => {
@@ -54,39 +66,47 @@ const TableColumnTitle = ({ children }: TableDefaultProps): JSX.Element => {
   return <Cell><span className="TableColumnTitle">{children}</span></Cell>;
 };
 
-const TableRowDimensionGroup = ({ children }: TableDefaultProps): JSX.Element => {
-  return (
-    <div className="TableRowDimensionGroup">{children}</div>
-  );
+const TableBody = ({ children }: TableDefaultProps): JSX.Element => {
+  return <div className="TableBody">{children}</div>;
 };
 
-const TableSubResult = ({ children }: TableDefaultProps): JSX.Element => {
-  return <Cell className="TableSubResult"><span>{children}</span></Cell>;
-};
-const TableRowDimFinalResult = ({ children }: TableDefaultProps): JSX.Element => {
-  return <Cell className="TableRowDimFinalResult">{children}</Cell>;
+const TableRowDimensions = ({ children }: TableDefaultProps): JSX.Element => {
+  return <div className="TableRowDimensions">{children}</div>;
 };
 
-const TableColumnDimension = ({ children, scrollable }: TableColDimsWrapperProps): JSX.Element => {
-  return <div className={`TableColumnDimension ${scrollable ? 'isScrollable' : ''}`}>{children}</div>;
+const TableRowSubResult = ({ children }: TableDefaultProps): JSX.Element => {
+  return <Cell className="TableRowSubResult"><span>{children}</span></Cell>;
 };
 
-const TableMetrics = ({ children }: TableDefaultProps): JSX.Element => {
-  return <Cell isCellGroup noPadding className="TableMetrics">{children}</Cell>;
+const TableRowFinalResult = ({ children }: TableDefaultProps): JSX.Element => {
+  return <Cell className="TableRowFinalResult"><span>{children}</span></Cell>;
 };
 
-const PivotTable = ({ data, rowTitle, colTitle }: PivotTableProps): JSX.Element => {
+const TableColumnDimensions = ({ children, scrollable }: TableColDimsWrapperProps): JSX.Element => {
+  return <div className={`TableColumnDimensions ${scrollable ? 'isScrollable' : ''}`}>{children}</div>;
+};
+
+const TableColumn = ({ children }: TableDefaultProps): JSX.Element => {
+  return <div className="TableColumn">{children}</div>;
+};
+
+const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
   const { rowDims, colMetrics } = data;
+  const { rowTitle, colTitle, rowDimTitle, rowDimSubTitle, subResultText, finalResultText } = tableConfig;
   return (
     <div className="TableContainer">
-      <TableRowDimension>
+      <TableRowDimensions>
         <TableHeader>
           <TableTitle>{rowTitle.toLocaleUpperCase()}</TableTitle>
         </TableHeader>
-        <TableRowDimensionGroup>
+        <TableBody>
           <Cell className="TableColumnTitleGroup" isCellGroup noPadding>
-            <TableColumnTitle>Category</TableColumnTitle>
-            <TableColumnTitle>Sub-Category</TableColumnTitle>
+            <TableColumnTitle>
+              {rowDimTitle}
+            </TableColumnTitle>
+            <TableColumnTitle>
+              {rowDimSubTitle}
+            </TableColumnTitle>
           </Cell>
           {rowDims.toArray().map(([title, subDims]) => {
             return (
@@ -99,56 +119,48 @@ const PivotTable = ({ data, rowTitle, colTitle }: PivotTableProps): JSX.Element 
                     {subDims.map(d => <Cell key={d}><span>{d}</span></Cell>)}
                   </Cell>
                 </Cell>
-                <TableSubResult>{`${title} total`}</TableSubResult>
+                <TableRowSubResult>{`${title} ${subResultText}`}</TableRowSubResult>
               </React.Fragment>
             )
           })}
-          <TableRowDimFinalResult><span>Grand total</span></TableRowDimFinalResult>
-        </TableRowDimensionGroup>
-      </TableRowDimension>
-      <TableColumnDimension scrollable>
+          <TableRowFinalResult>{finalResultText}</TableRowFinalResult>
+        </TableBody>
+      </TableRowDimensions>
+      <TableColumnDimensions scrollable>
         <TableHeader>
           <TableTitle>{colTitle.toLocaleUpperCase()}</TableTitle>
         </TableHeader>
-        <TableMetrics>
+        <TableBody>
           {colMetrics.toArray().map(([key, v]) => {
-            // state
             const finalResultIdx = v.length - 1;
+            // By state
             return (
-              <div key={key}>
+              <TableColumn key={key}>
                 <TableColumnTitle>
                   {key}
                 </TableColumnTitle>
                 {v.map((_v, idx) => {
-                  // category
+                  // By Category
                   return _v.map((n, i) => {
-                    let className = i === _v.length - 1 ? 'TableSubResult' : '';
+                    // Sub category totals
+                    let Component = i === _v.length - 1 ? TableRowSubResult : Cell;
                     if (finalResultIdx === idx) {
-                      className = 'TableRowDimFinalResult';
+                      Component = TableRowFinalResult;
                     }
                     return (
                       <React.Fragment key={`${key}-${n.toString()}-${i}`}>
-                        <Cell className={className}>
-                          <span>{n}</span>
-                        </Cell>
+                        <Component>
+                          <span>{prettifyNumber(n)}</span>
+                        </Component>
                       </React.Fragment>
                     );
                   })
                 })}
-              </div>
+              </TableColumn>
             )}
           )}
-        </TableMetrics>
-        {/* <TableMetricsGrandTotal>
-          {grandTotals.map(total => {
-            return (
-              <div>
-                <span>{total}</span>
-              </div>
-            )
-          })}
-        </TableMetricsGrandTotal> */}
-      </TableColumnDimension>
+        </TableBody>
+      </TableColumnDimensions>
     </div>
   );
 };
