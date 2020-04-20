@@ -12,11 +12,14 @@ type PivotTableProps = {
     rowDimSubTitle: string;
     subResultText: string;
     finalResultText: string;
-  }
+    highlightLastColumn?: boolean;
+    tableMetric: string;
+  };
 };
 
 type TableDefaultProps = {
   children: React.ReactNode;
+  className?: string;
 };
 
 interface TableColDimsWrapperProps extends TableDefaultProps {
@@ -24,7 +27,6 @@ interface TableColDimsWrapperProps extends TableDefaultProps {
 }
 
 interface CellProps extends TableDefaultProps {
-  className?: string;
   isCellGroup?: boolean;
   noPadding?: boolean;
 }
@@ -54,6 +56,14 @@ const Cell = ({ className, isCellGroup, children, noPadding, ...rest }: CellProp
   return <div className={classes} {...rest}>{children}</div>;
 };
 
+const Table = ({ children }: TableDefaultProps): JSX.Element => {
+  return <div className="Table">{children}</div>;
+};
+
+const TableName = ({ children }: TableDefaultProps): JSX.Element => {
+  return <div className="TableName"><h1>{children}</h1></div>;
+};
+
 const TableHeader = ({ children }: TableDefaultProps): JSX.Element => {
   return <div className="TableHeader">{children}</div>;
 };
@@ -74,12 +84,12 @@ const TableRowDimensions = ({ children }: TableDefaultProps): JSX.Element => {
   return <div className="TableRowDimensions">{children}</div>;
 };
 
-const TableRowSubResult = ({ children }: TableDefaultProps): JSX.Element => {
-  return <Cell className="TableRowSubResult"><span>{children}</span></Cell>;
+const TableRowSubResult = ({ children, className }: TableDefaultProps): JSX.Element => {
+  return <Cell className={cx('TableRowSubResult', className)}><span>{children}</span></Cell>;
 };
 
-const TableRowFinalResult = ({ children }: TableDefaultProps): JSX.Element => {
-  return <Cell className="TableRowFinalResult"><span>{children}</span></Cell>;
+const TableRowFinalResult = ({ children, className }: TableDefaultProps): JSX.Element => {
+  return <Cell className={cx('TableRowFinalResult', className)}><span>{children}</span></Cell>;
 };
 
 const TableColumnDimensions = ({ children, scrollable }: TableColDimsWrapperProps): JSX.Element => {
@@ -92,75 +102,88 @@ const TableColumn = ({ children }: TableDefaultProps): JSX.Element => {
 
 const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
   const { rowDims, colMetrics } = data;
-  const { rowTitle, colTitle, rowDimTitle, rowDimSubTitle, subResultText, finalResultText } = tableConfig;
+  const {
+    rowTitle,
+    colTitle,
+    rowDimTitle,
+    rowDimSubTitle,
+    subResultText,
+    finalResultText,
+    highlightLastColumn,
+    tableMetric
+  } = tableConfig;
   return (
     <div className="TableContainer">
-      <TableRowDimensions>
-        <TableHeader>
-          <TableTitle>{rowTitle.toLocaleUpperCase()}</TableTitle>
-        </TableHeader>
-        <TableBody>
-          <Cell className="TableColumnTitleGroup" isCellGroup noPadding>
-            <TableColumnTitle>
-              {rowDimTitle}
-            </TableColumnTitle>
-            <TableColumnTitle>
-              {rowDimSubTitle}
-            </TableColumnTitle>
-          </Cell>
-          {rowDims.toArray().map(([title, subDims]) => {
-            return (
-              <React.Fragment key={title}>
-                <Cell isCellGroup>
-                  <Cell>
-                    <span>{title}</span>
+      <TableName>Sum of {tableMetric}</TableName>
+      <Table>
+        <TableRowDimensions>
+          <TableHeader>
+            <TableTitle>{rowTitle.toLocaleUpperCase()}</TableTitle>
+          </TableHeader>
+          <TableBody>
+            <Cell className="TableColumnTitleGroup" isCellGroup noPadding>
+              <TableColumnTitle>
+                {rowDimTitle}
+              </TableColumnTitle>
+              <TableColumnTitle>
+                {rowDimSubTitle}
+              </TableColumnTitle>
+            </Cell>
+            {rowDims.toArray().map(([title, subDims]) => {
+              return (
+                <React.Fragment key={title}>
+                  <Cell isCellGroup>
+                    <Cell>
+                      <span>{title}</span>
+                    </Cell>
+                    <Cell noPadding>
+                      {subDims.map(d => <Cell key={d}><span>{d}</span></Cell>)}
+                    </Cell>
                   </Cell>
-                  <Cell noPadding>
-                    {subDims.map(d => <Cell key={d}><span>{d}</span></Cell>)}
-                  </Cell>
-                </Cell>
-                <TableRowSubResult>{`${title} ${subResultText}`}</TableRowSubResult>
-              </React.Fragment>
-            )
-          })}
-          <TableRowFinalResult>{finalResultText}</TableRowFinalResult>
-        </TableBody>
-      </TableRowDimensions>
-      <TableColumnDimensions scrollable>
-        <TableHeader>
-          <TableTitle>{colTitle.toLocaleUpperCase()}</TableTitle>
-        </TableHeader>
-        <TableBody>
-          {colMetrics.toArray().map(([key, v]) => {
-            const finalResultIdx = v.length - 1;
-            // By state
-            return (
-              <TableColumn key={key}>
-                <TableColumnTitle>
-                  {key}
-                </TableColumnTitle>
-                {v.map((_v, idx) => {
-                  // By Category
-                  return _v.map((n, i) => {
-                    // Sub category totals
-                    let Component = i === _v.length - 1 ? TableRowSubResult : Cell;
-                    if (finalResultIdx === idx) {
-                      Component = TableRowFinalResult;
-                    }
-                    return (
-                      <React.Fragment key={`${key}-${n.toString()}-${i}`}>
-                        <Component>
-                          <span>{prettifyNumber(n)}</span>
-                        </Component>
-                      </React.Fragment>
-                    );
-                  })
-                })}
-              </TableColumn>
+                  <TableRowSubResult>{`${title} ${subResultText}`}</TableRowSubResult>
+                </React.Fragment>
+              )
+            })}
+            <TableRowFinalResult>{finalResultText}</TableRowFinalResult>
+          </TableBody>
+        </TableRowDimensions>
+        <TableColumnDimensions scrollable>
+          <TableHeader>
+            <TableTitle>{colTitle.toLocaleUpperCase()}</TableTitle>
+          </TableHeader>
+          <TableBody>
+            {colMetrics.toArray().map(([key, v], index) => {
+              const finalResultIdx = v.length - 1;
+              // By state
+              return (
+                <TableColumn key={key}>
+                  <TableColumnTitle>
+                    {key}
+                  </TableColumnTitle>
+                  {v.map((_v, idx) => {
+                    // By Category
+                    return _v.map((n, i) => {
+                      // Sub category totals
+                      const className = (highlightLastColumn && colMetrics.size - 1 === index) ? 'isHighlighted' : ''
+                      let Component = i === _v.length - 1 ? TableRowSubResult : Cell;
+                      if (finalResultIdx === idx) {
+                        Component = TableRowFinalResult;
+                      }
+                      return (
+                        <React.Fragment key={`${key}-${n.toString()}-${i}`}>
+                          <Component className={className}>
+                            <span>{prettifyNumber(n)}</span>
+                          </Component>
+                        </React.Fragment>
+                      );
+                    })
+                  })}
+                </TableColumn>
+              )}
             )}
-          )}
-        </TableBody>
-      </TableColumnDimensions>
+          </TableBody>
+        </TableColumnDimensions>
+      </Table>
     </div>
   );
 };

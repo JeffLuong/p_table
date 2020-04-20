@@ -16,7 +16,7 @@ export type Action = {
 
 // Mock request
 const makeRequest = (): Promise<OrderProps[]> => {
-  return new Promise(res => setTimeout(() => res(orders), 1000));
+  return new Promise(res => setTimeout(() => res(orders), 1500));
 };
 
 const requestOrders = (): Action => {

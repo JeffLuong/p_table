@@ -6,6 +6,7 @@ import { Orders } from '../redux/reducers/orders';
 import Order, { OrderProps, QunatifiableProps, BaseOrderStringProps } from '../models/order';
 import { OrderedMap, Set } from 'immutable';
 import PivotTable from './PivotTable';
+import Loader from './Loader';
 
 const { useEffect, useState } = React;
 
@@ -79,7 +80,7 @@ const formatData = (data: Orders, config: DataConfig): FormattedData => {
         const currSet = curr && curr[1];
         const currSetIdx = curr && _rowDims.indexOf(curr);
         // The initial array to use in reducing totals by sub categories selected from total state accumulated map
-        const initialTotals: number[] = (currSetIdx !== undefined && initialAccumulator[currSetIdx] || []);
+        const initialTotals: number[] = (((currSetIdx !== undefined) && initialAccumulator[currSetIdx]) || []);
 
         orders.groupBy(o => o.get(rowSubDimension)).sortBy((val, k) => k).reduce((totals: number[], orders, subDim) => {
           // Get the index of current sub category in the current `OrderedSet`: i.e. index of 'Bookcases'
@@ -125,6 +126,7 @@ const ProductSalesByStateTable = (): JSX.Element => {
   const [formattedData, setFormattedData] = useState<FormattedData>();
   const ordersRemoteVal = useSelector((state: AppState) => state.orders);
   const { value } = ordersRemoteVal;
+  const metric = 'sales';
 
   useEffect(() => {
     if (!value) {
@@ -134,7 +136,7 @@ const ProductSalesByStateTable = (): JSX.Element => {
         rowDimension: 'category',
         rowSubDimension: 'subCategory',
         colDimension: 'state',
-        colMetric: 'sales'
+        colMetric: metric
       }));
     }
   }, [dispatch, value]);
@@ -146,12 +148,14 @@ const ProductSalesByStateTable = (): JSX.Element => {
       rowDimTitle: 'Category',
       rowDimSubTitle: 'Sub Category',
       subResultText: 'Total',
-      finalResultText: 'Grand Total'
+      finalResultText: 'Grand Total',
+      highlightLastColumn: true,
+      tableMetric: metric
     };
     return <PivotTable tableConfig={config} data={formattedData} />;
   }
 
-  return <h1>LOADING...</h1>
+  return <Loader />;
 };
 
 export default ProductSalesByStateTable;

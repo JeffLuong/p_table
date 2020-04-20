@@ -1,35 +1,50 @@
+$prefix:'-moz-', '-webkit-', '-o-', '-ms-', '';
+
+@mixin prefixAttributes($attrs, $values) {
+  @each $p in $prefix {
+    #{$p}#{$attrs}: $values;
+  }
+}
+
+@mixin transform($position) {
+  @include prefixAttributes('transform', $position);
+}
+
 @keyframes Flip {
   0% {
-    transform: rotateY(0deg);
+    @include transform(rotateY(0deg));
   }
   50% {
     background: #011439;
   }
   100% {
-    transform: rotateY(180deg);
-  } }
+    @include transform(rotateY(180deg));
+  }
+}
 
 .Loader {
   position: absolute;
-  top: calc(50% - 20px);
-  left: calc(50% - 20px);
-}
+  top: 50%;
+  left: 50%;
+  @include transform(translate(-50%, -50%));
 
-.LoaderCircle {
-  width: 60px;
-  height: 60px;
-  background: #032873;
-  border-radius: 50%;
-  overflow: hidden;
-  position: relative;
-}
-
-.LoaderHalfCircles {
-  width: 30px;
-  height: 60px;
-  display: inline-block;
-  position: absolute;
-  border-radius: 30px 0 0 30px;
-  transform-origin: 30px 0;
-  animation: Flip .75s linear infinite;
+  .LoaderCircle {
+    width: 60px;
+    height: 60px;
+    background: #032873;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .LoaderHalfCircles {
+    width: 30px;
+    height: 60px;
+    display: inline-block;
+    position: absolute;
+    border-radius: 30px 0 0 30px;
+    transform-origin: 30px 0;
+    left: 0;
+    animation: Flip .75s linear infinite;
+  }
 }
