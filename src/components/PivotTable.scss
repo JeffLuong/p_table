@@ -1,0 +1,122 @@
+$white: #ffffff;
+
+.TableContainer {
+  display: flex;
+  width: 100%;
+
+  $header__background-color: #032873;
+  $row-dim__width: 25rem;
+  $row-dim-sub-result__background-color: #eeeeee;
+  $row-dim-sub-result__border-color: #dddddd;
+  $row-dim-final-result__background-color: #333333;
+  $col-title-text__color: #b3bed5;
+
+  .TableSubResult {
+    background-color: $row-dim-sub-result__background-color;
+    border-top: 1px solid $row-dim-sub-result__border-color;
+    border-bottom: 1px solid $row-dim-sub-result__border-color;
+  }
+
+  .TableRowDimension {
+    box-shadow: 0px -8px 16px 0px rgba(0, 0, 0, .25);
+    width: $row-dim__width;
+    grid-template-rows: 50px calc(100% - 100px) 50px;
+    grid-template-areas:
+        "row-header"
+        "row-dimensions"
+        "row-total";
+    z-index: 10;
+  }
+
+  .TableRowDimensionGroup {
+    grid-area: row-dimensions;
+
+    .TableColumnTitleGroup {
+      background-color: $header__background-color;
+    }
+  }
+
+  .TableColumnTitle {
+    color: $col-title-text__color;
+  }
+
+  .TableHeader {
+    display: grid;
+    grid-area: row-header;
+
+    .TableTitle {
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .TableTitle {
+      color: $white;
+    }
+
+    .Cell {
+      background-color: $header__background-color;
+    }
+  }
+
+  .TableRowDimFinalResult {
+    background-color: $row-dim-final-result__background-color;
+    grid-area: row-total;
+
+    > span {
+      color: $white;
+    }
+  }
+
+  .TableColumnDimension {
+    text-align: right;
+    width: calc(100% - #{$row-dim__width});
+    display: grid;
+    grid-template-rows: 51px calc(100% - 51px);
+    grid-template-areas: 
+      "column-header"
+      "column-metrics";
+
+    .TableHeader {
+      grid-area: column-header;
+    }
+  }
+
+  .TableMetrics {
+    display: grid;
+    grid-area: column-metrics;
+
+    .Cell {
+      text-align: right;
+
+      &:first-of-type {
+        background-color: $header__background-color;
+      }
+    }
+  }
+}
+
+.Cell {
+  text-align: left;
+
+  span {
+    white-space: nowrap;
+  }
+
+  &:not(.noPadding) {
+    padding: 1rem;
+  }
+
+  &.CellGroup {
+    display: flex;
+    padding: 0;
+    width: 100%;
+
+    > .Cell {
+      width: 50%;
+    }
+  }
+}
+
+.isScrollable {
+  overflow-x: auto;
+}

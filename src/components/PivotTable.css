@@ -1,0 +1,65 @@
+.TableContainer {
+  display: flex;
+  width: 100%; }
+  .TableContainer .TableSubResult {
+    background-color: #eeeeee;
+    border-top: 1px solid #dddddd;
+    border-bottom: 1px solid #dddddd; }
+  .TableContainer .TableRowDimension {
+    box-shadow: 0px -8px 16px 0px rgba(0, 0, 0, 0.25);
+    width: 25rem;
+    grid-template-rows: 50px calc(100% - 100px) 50px;
+    grid-template-areas: "row-header" "row-dimensions" "row-total";
+    z-index: 10; }
+  .TableContainer .TableRowDimensionGroup {
+    grid-area: row-dimensions; }
+    .TableContainer .TableRowDimensionGroup .TableColumnTitleGroup {
+      background-color: #032873; }
+  .TableContainer .TableColumnTitle {
+    color: #b3bed5; }
+  .TableContainer .TableHeader {
+    display: grid;
+    grid-area: row-header; }
+    .TableContainer .TableHeader .TableTitle {
+      text-align: left;
+      white-space: nowrap; }
+    .TableContainer .TableHeader .TableTitle {
+      color: #ffffff; }
+    .TableContainer .TableHeader .Cell {
+      background-color: #032873; }
+  .TableContainer .TableRowDimFinalResult {
+    background-color: #333333;
+    grid-area: row-total; }
+    .TableContainer .TableRowDimFinalResult > span {
+      color: #ffffff; }
+  .TableContainer .TableColumnDimension {
+    text-align: right;
+    width: calc(100% - 25rem);
+    display: grid;
+    grid-template-rows: 51px calc(100% - 51px);
+    grid-template-areas: "column-header" "column-metrics"; }
+    .TableContainer .TableColumnDimension .TableHeader {
+      grid-area: column-header; }
+  .TableContainer .TableMetrics {
+    display: grid;
+    grid-area: column-metrics; }
+    .TableContainer .TableMetrics .Cell {
+      text-align: right; }
+      .TableContainer .TableMetrics .Cell:first-of-type {
+        background-color: #032873; }
+
+.Cell {
+  text-align: left; }
+  .Cell span {
+    white-space: nowrap; }
+  .Cell:not(.noPadding) {
+    padding: 1rem; }
+  .Cell.CellGroup {
+    display: flex;
+    padding: 0;
+    width: 100%; }
+    .Cell.CellGroup > .Cell {
+      width: 50%; }
+
+.isScrollable {
+  overflow-x: auto; }
