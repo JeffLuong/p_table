@@ -25,13 +25,13 @@ const makeRequest = (): Promise<OrderProps[]> => {
   return new Promise(res => setTimeout(() => res(orders), 1500));
 };
 
-const requestOrders = (): Action => {
+export const onRequestOrders = (): Action => {
   return {
     type: REQUEST_ORDERS_REQUEST
   };
 };
 
-const onOrdersReqSuccess = (orders: OrderProps[]): Action => {
+export const onOrdersReqSuccess = (orders: OrderProps[]): Action => {
   return {
     type: REQUEST_ORDERS_SUCCESS,
     payload: {
@@ -40,7 +40,7 @@ const onOrdersReqSuccess = (orders: OrderProps[]): Action => {
   };
 };
 
-const onOrdersReqFailure = (error: Error): Action => {
+export const onOrdersReqFailure = (error: Error): Action => {
   return {
     type: REQUEST_ORDERS_FAILURE,
     payload: {
@@ -52,7 +52,7 @@ const onOrdersReqFailure = (error: Error): Action => {
 
 export const fetchOrders = () => {
   return (dispatch: AppDispatch): Promise<Action> => {
-    dispatch(requestOrders());
+    dispatch(onRequestOrders());
 
     return makeRequest()
       .then(data => dispatch(onOrdersReqSuccess(data)))

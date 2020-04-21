@@ -63,7 +63,10 @@ class Order extends Record(defaultOrderProps) implements OrderProps {
 
   static fromService(obj?: Partial<OrderProps>): Order {
     if (obj) {
-      return new Order(obj);
+      return new Order({
+        ...defaultOrderProps,
+        ...obj
+      });
     }
     return new Order(defaultOrderProps);
   }

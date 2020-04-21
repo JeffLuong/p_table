@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import type { FormattedData } from '../ProductSalesByStateTable';
+import type { FormattedData, ColumnDimensionValues, RowDimensionValues } from '../ProductSalesByStateTable';
 import './PivotTable.scss';
 
 type PivotTableProps = {
@@ -17,16 +17,16 @@ type PivotTableProps = {
   };
 };
 
-type TableDefaultProps = {
+type TDefProps = {
   children: React.ReactNode;
   className?: string;
 };
 
-interface TableColDimsWrapperProps extends TableDefaultProps {
+interface TableColDimsWrapperProps extends TDefProps {
   scrollable?: boolean;
 }
 
-interface CellProps extends TableDefaultProps {
+interface CellProps extends TDefProps {
   isCellGroup?: boolean;
   noPadding?: boolean;
 }
@@ -36,7 +36,7 @@ interface CellProps extends TableDefaultProps {
  * @param n number
  * @returns string
  */
-const prettifyNumber = (n: number): string => {
+export const prettifyNumber = (n: number): string => {
   const stringNums = n.toString().split('');
   return stringNums.map((s, i) => {
     if ((stringNums.length - i) % 3 === 0) {
@@ -56,39 +56,25 @@ const Cell = ({ className, isCellGroup, children, noPadding, ...rest }: CellProp
   return <div className={classes} {...rest}>{children}</div>;
 };
 
-const Table = ({ children }: TableDefaultProps): JSX.Element => {
-  return <div className="Table">{children}</div>;
-};
+const Table = ({ children }: TDefProps): JSX.Element => <div className="Table">{children}</div>;
 
-const TableName = ({ children }: TableDefaultProps): JSX.Element => {
-  return <div className="TableName"><h1>{children}</h1></div>;
-};
+const TableName = ({ children }: TDefProps): JSX.Element => <div className="TableName"><h1>{children}</h1></div>;
 
-const TableHeader = ({ children }: TableDefaultProps): JSX.Element => {
-  return <div className="TableHeader">{children}</div>;
-};
+const TableHeader = ({ children }: TDefProps): JSX.Element => <div className="TableHeader">{children}</div>;
 
-const TableTitle = ({ children }: TableDefaultProps): JSX.Element => {
-  return <Cell><h3 className="TableTitle">{children}</h3></Cell>;
-};
+const TableTitle = ({ children }: TDefProps): JSX.Element => <Cell><h3 className="TableTitle">{children}</h3></Cell>;
 
-const TableColumnTitle = ({ children }: TableDefaultProps): JSX.Element => {
-  return <Cell><span className="TableColumnTitle">{children}</span></Cell>;
-};
+const TableColumnTitle = ({ children }: TDefProps): JSX.Element => <Cell><span className="TableColumnTitle">{children}</span></Cell>;
 
-const TableBody = ({ children }: TableDefaultProps): JSX.Element => {
-  return <div className="TableBody">{children}</div>;
-};
+const TableBody = ({ children }: TDefProps): JSX.Element => <div className="TableBody">{children}</div>;
 
-const TableRowDimensions = ({ children }: TableDefaultProps): JSX.Element => {
-  return <div className="TableRowDimensions">{children}</div>;
-};
+const TableRowDimensions = ({ children }: TDefProps): JSX.Element => <div className="TableRowDimensions">{children}</div>;
 
-const TableRowSubResult = ({ children, className }: TableDefaultProps): JSX.Element => {
+const TableRowSubResult = ({ children, className }: TDefProps): JSX.Element => {
   return <Cell className={cx('TableRowSubResult', className)}><span>{children}</span></Cell>;
 };
 
-const TableRowFinalResult = ({ children, className }: TableDefaultProps): JSX.Element => {
+const TableRowFinalResult = ({ children, className }: TDefProps): JSX.Element => {
   return <Cell className={cx('TableRowFinalResult', className)}><span>{children}</span></Cell>;
 };
 
@@ -96,8 +82,70 @@ const TableColumnDimensions = ({ children, scrollable }: TableColDimsWrapperProp
   return <div className={`TableColumnDimensions ${scrollable ? 'isScrollable' : ''}`}>{children}</div>;
 };
 
-const TableColumn = ({ children }: TableDefaultProps): JSX.Element => {
-  return <div className="TableColumn">{children}</div>;
+const TableColumn = ({ children }: TDefProps): JSX.Element => <div className="TableColumn">{children}</div>;
+
+export const TableRowDimensionValues = ({
+  rows,
+  rowSubResultText
+}: {
+  rows: RowDimensionValues;
+  rowSubResultText: string;
+}): JSX.Element => {
+  const rowDimValues = rows.toArray().map(([title, subDims]) => {
+    return (
+      <React.Fragment key={title}>
+        <Cell isCellGroup className="TableRowDimensionTitle">
+          <Cell>
+            <span>{title}</span>
+          </Cell>
+          <Cell noPadding>
+            {subDims.map(d => <Cell key={d}><span>{d}</span></Cell>)}
+          </Cell>
+        </Cell>
+        <TableRowSubResult>{`${title} ${rowSubResultText}`}</TableRowSubResult>
+      </React.Fragment>
+    );
+  });
+  return <>{rowDimValues}</>;
+};
+
+export const TableColumnDimensionValues = ({
+  columns,
+  highlightLastColumn
+}: {
+  columns: ColumnDimensionValues;
+  highlightLastColumn?: boolean;
+}): JSX.Element => {
+  const colDimValues = columns.toArray().map(([key, v], index) => {
+    const finalResultIdx = v.length - 1;
+    // By state
+    return (
+      <TableColumn key={key}>
+        <TableColumnTitle>
+          {key}
+        </TableColumnTitle>
+        {v.map((_v, idx) => {
+          // By Category
+          return _v.map((n, i) => {
+            // Sub category totals
+            const className = (highlightLastColumn && columns.size - 1 === index) ? 'isHighlighted' : ''
+            let Component = i === _v.length - 1 ? TableRowSubResult : Cell;
+            if (finalResultIdx === idx) {
+              Component = TableRowFinalResult;
+            }
+            return (
+              <React.Fragment key={`${key}-${n.toString()}-${i}`}>
+                <Component className={className}>
+                  <span>{prettifyNumber(n)}</span>
+                </Component>
+              </React.Fragment>
+            );
+          })
+        })}
+      </TableColumn>
+    )
+  });
+  return <>{colDimValues}</>;
 };
 
 const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
@@ -129,21 +177,7 @@ const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
                 {rowDimSubTitle}
               </TableColumnTitle>
             </Cell>
-            {rowDims.toArray().map(([title, subDims]) => {
-              return (
-                <React.Fragment key={title}>
-                  <Cell isCellGroup className="TableRowDimensionTitle">
-                    <Cell>
-                      <span>{title}</span>
-                    </Cell>
-                    <Cell noPadding>
-                      {subDims.map(d => <Cell key={d}><span>{d}</span></Cell>)}
-                    </Cell>
-                  </Cell>
-                  <TableRowSubResult>{`${title} ${subResultText}`}</TableRowSubResult>
-                </React.Fragment>
-              )
-            })}
+            <TableRowDimensionValues rows={rowDims} rowSubResultText={subResultText} />
             <TableRowFinalResult>{finalResultText}</TableRowFinalResult>
           </TableBody>
         </TableRowDimensions>
@@ -152,35 +186,7 @@ const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
             <TableTitle>{colTitle.toLocaleUpperCase()}</TableTitle>
           </TableHeader>
           <TableBody>
-            {colMetrics.toArray().map(([key, v], index) => {
-              const finalResultIdx = v.length - 1;
-              // By state
-              return (
-                <TableColumn key={key}>
-                  <TableColumnTitle>
-                    {key}
-                  </TableColumnTitle>
-                  {v.map((_v, idx) => {
-                    // By Category
-                    return _v.map((n, i) => {
-                      // Sub category totals
-                      const className = (highlightLastColumn && colMetrics.size - 1 === index) ? 'isHighlighted' : ''
-                      let Component = i === _v.length - 1 ? TableRowSubResult : Cell;
-                      if (finalResultIdx === idx) {
-                        Component = TableRowFinalResult;
-                      }
-                      return (
-                        <React.Fragment key={`${key}-${n.toString()}-${i}`}>
-                          <Component className={className}>
-                            <span>{prettifyNumber(n)}</span>
-                          </Component>
-                        </React.Fragment>
-                      );
-                    })
-                  })}
-                </TableColumn>
-              )}
-            )}
+            <TableColumnDimensionValues columns={colMetrics} highlightLastColumn={highlightLastColumn} />
           </TableBody>
         </TableColumnDimensions>
       </Table>

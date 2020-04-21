@@ -8,10 +8,12 @@ export type Orders = List<Order>;
 
 type State = RemoteValue<Order>;
 
-const extractError = (action: Action): string => {
+export const defaultErrorMsg = 'Something went wrong! Please try again later.';
+
+export const extractError = (action: Action): string => {
   const { payload } = action;
   const _error = payload && payload.error;
-  return (_error && _error.message) || 'Something went wrong! Please try again later.';
+  return (_error && _error.message) || defaultErrorMsg;
 };
 
 export default function(

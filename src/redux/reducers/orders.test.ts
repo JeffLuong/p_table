@@ -1,10 +1,32 @@
 import expect from 'expect.js';
 import { REQUEST_ORDERS_REQUEST, REQUEST_ORDERS_SUCCESS, REQUEST_ORDERS_FAILURE } from '../actions/orders';
-import ordersReducer from './orders';
+import ordersReducer, { defaultErrorMsg, extractError } from './orders';
 import RemoteValue from '../../lib/RemoteValue';
 import Order from '../../models/order';
 
 describe('reducers/orders', () => {
+  describe('extractError', () => {
+    it('with proper Error', () => {
+      const error = extractError({
+        type: REQUEST_ORDERS_REQUEST,
+        payload: {
+          error: new Error('Whoops!')
+        }
+      });
+      expect(error).to.be('Whoops!');
+    });
+
+    it('without proper Error', () => {
+      const error = extractError({
+        type: REQUEST_ORDERS_REQUEST,
+        payload: {
+          error: undefined
+        }
+      });
+      expect(error).to.be(defaultErrorMsg);
+    });
+  });
+
   it('REQUEST_ORDERS_REQUEST - returns expected state', () => {
     const state = ordersReducer(
       new RemoteValue(),

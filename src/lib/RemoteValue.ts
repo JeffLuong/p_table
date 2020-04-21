@@ -30,7 +30,7 @@ class RemoteValue<RecType> extends Record(defaultRemoteProps) implements RemoteP
   }
 
   loaded(): boolean {
-    return !this.isFetching && !this.didEverLoad && !this.error;
+    return !this.isFetching && this.didEverLoad && !this.error;
   }
 }
 

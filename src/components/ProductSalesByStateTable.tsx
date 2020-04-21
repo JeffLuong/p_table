@@ -17,9 +17,12 @@ type DataConfig = {
   colMetric: keyof QunatifiableProps;
 };
 
+export type RowDimensionValues = OrderedMap<string, Set<string>>;
+export type ColumnDimensionValues = OrderedMap<string | number, number[][]>;
+
 export type FormattedData = {
-  rowDims: OrderedMap<string, Set<string>>;
-  colMetrics: OrderedMap<string | number, number[][]>;
+  rowDims: RowDimensionValues;
+  colMetrics: ColumnDimensionValues;
 }
 
 const camelToSentenceCase = (str: string): string => {
@@ -53,7 +56,7 @@ const createColumnMap = (nestedArr: [string, string[]][]): number[][] => {
   return columnMap;
 };
 
-const formatData = (data: Orders, config: DataConfig): FormattedData => {
+export const formatData = (data: Orders, config: DataConfig): FormattedData => {
   const { rowDimension, rowSubDimension, colDimension, colMetric } = config;
   const rowDims = data
     .groupBy(o => o.get(rowDimension))
@@ -138,7 +141,7 @@ const ProductSalesByStateTable = (): JSX.Element => {
   // Data config for table: feel free to change these dimensions and metric with these rules:
   // 1. Operation is always going to be 'sum'.
   // 2. Dimensions should be configurable via any string data attribute.
-  // 3. Metric should be configurable via any of the number data attributes:
+  // 3. Metric should be configurable via any of these number data attributes:
   //   a. 'sales'
   //   b. 'quantity'
   //   c. 'profit'
@@ -161,7 +164,7 @@ const ProductSalesByStateTable = (): JSX.Element => {
     }
   }, [dispatch, value]);
 
-  if (formattedData) {
+  if (formattedData && ordersRemoteVal.loaded()) {
     const config = {
       rowTitle: 'Products',
       colTitle: camelToSentenceCase(colDimension),
