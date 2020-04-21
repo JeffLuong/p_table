@@ -9,7 +9,7 @@ import Order from './models/order';
 
 const mockStore = configureStore();
 
-it('renders without crashing', () => {
+it('renders app with initial state', () => {
   const div = document.createElement('div');
   const store = mockStore({
     orders: new RemoteValue({

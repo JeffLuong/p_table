@@ -8,33 +8,36 @@ export type Orders = List<Order>;
 
 type State = RemoteValue<Order>;
 
+const extractError = (action: Action): string => {
+  const { payload } = action;
+  const _error = payload && payload.error;
+  return (_error && _error.message) || 'Something went wrong! Please try again later.';
+};
+
 export default function(
   state: State = new RemoteValue(),
   action: Action
 ): State {
-  if (action.type === REQUEST_ORDERS_REQUEST) {
-    return state.merge({
-      isFetching: true,
-      didInvalidate: false,
-      error: ''
-    });
-  } else if (action.type === REQUEST_ORDERS_SUCCESS) {
-    const { payload } = action;
-    return state.merge({
-      isFetching: false,
-      didInvalidate: false,
-      value: payload ? List(payload.orders).map(Order.fromService) : List([]),
-      error: ''
-    });
-  } else if (action.type === REQUEST_ORDERS_FAILURE) {
-    const { payload } = action;
-    const _error = payload && payload.error;
-    const error = (_error && _error.message) || 'Something went wrong! Please try again later.';
-    return state.merge({
-      isFetching: false,
-      didInvalidate: false,
-      error
-    });
+  switch(action.type) {
+    case REQUEST_ORDERS_REQUEST:
+      return state.merge({
+        isFetching: true,
+        didInvalidate: false,
+        error: ''
+      });
+    case REQUEST_ORDERS_SUCCESS:
+      return state.merge({
+        isFetching: false,
+        didEverLoad: true,
+        value: List((action.payload && action.payload.orders) || []).map(Order.fromService),
+        error: ''
+      });
+    case REQUEST_ORDERS_FAILURE:
+      return state.merge({
+        isFetching: false,
+        error: extractError(action)
+      });
+    default:
+      return state;
   }
-  return state;
 }

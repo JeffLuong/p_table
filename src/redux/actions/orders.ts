@@ -2,14 +2,20 @@ import orders from '../../data/orders.json';
 import { OrderProps } from '../../models/order';
 import type { AppDispatch } from '../reducers/configureStore';
 
-export const REQUEST_ORDERS_REQUEST = 'REQUEST_ORDERS_REQUEST';
-export const REQUEST_ORDERS_SUCCESS = 'REQUEST_ORDERS_SUCCESS';
-export const REQUEST_ORDERS_FAILURE = 'REQUEST_ORDERS_FAILURE';
+export enum OrderActions {
+  REQUEST_ORDERS_REQUEST = 'REQUEST_ORDERS_REQUEST',
+  REQUEST_ORDERS_SUCCESS = 'REQUEST_ORDERS_SUCCESS',
+  REQUEST_ORDERS_FAILURE = 'REQUEST_ORDERS_FAILURE'
+}
+
+export const REQUEST_ORDERS_REQUEST = OrderActions.REQUEST_ORDERS_REQUEST;
+export const REQUEST_ORDERS_SUCCESS = OrderActions.REQUEST_ORDERS_SUCCESS;
+export const REQUEST_ORDERS_FAILURE = OrderActions.REQUEST_ORDERS_FAILURE;
 
 export type Action = {
-  type: string;
+  type: OrderActions.REQUEST_ORDERS_REQUEST | OrderActions.REQUEST_ORDERS_SUCCESS | OrderActions.REQUEST_ORDERS_FAILURE;
   payload?: {
-    orders: OrderProps[];
+    orders?: OrderProps[];
     error?: Error;
   };
 };
