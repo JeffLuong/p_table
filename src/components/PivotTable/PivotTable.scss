@@ -6,18 +6,19 @@ $white: #ffffff;
   $table-name__height: 65px;
 
   .TableName {
-    position: fixed;
+    background-color: #02205c;
 
     > h1 {
-      text-transform: uppercase;
-      padding: 1rem 1.5rem;
+      color: #ffffff;
       height: $table-name__height;
+      padding: 1rem 1.5rem;
+      text-align: left;
+      text-transform: uppercase;
     }
   }
 
   .Table {
     display: flex;
-    padding-top: $table-name__height;
     width: 100%;
 
     $header__background-color: #032873;
@@ -42,9 +43,9 @@ $white: #ffffff;
       width: $row-dim__width;
       grid-template-rows: 50px calc(100% - 100px) 50px;
       grid-template-areas:
-          "row-header"
-          "row-dimensions"
-          "row-total";
+        "row-header"
+        "row-dimensions"
+        "row-total";
       z-index: 10;
 
       .TableBody {
@@ -60,20 +61,36 @@ $white: #ffffff;
       color: $col-title-text__color;
     }
 
+    .TableRowDimensionTitle > .Cell:first-of-type span {
+      font-weight: 700;
+
+      &::before {
+        background-color: #0C66BF;
+        border-radius: 3px;
+        content: '—';
+        color: white;
+        display: inline-block;
+        font-size: .75rem;
+        height: 1rem;
+        width: 1rem;
+        margin-right: .5rem;
+        padding: .125rem;
+        text-align: center;
+        vertical-align: text-bottom;
+      }
+    }
+
     .TableHeader {
       grid-area: row-header;
 
       .TableTitle {
+        color: $white;
         text-align: left;
         white-space: nowrap;
       }
 
-      .TableTitle {
-        color: $white;
-      }
-
       .Cell {
-        background-color: $header__background-color;
+        background-color: #022467;
       }
     }
 
@@ -101,6 +118,12 @@ $white: #ffffff;
 
       .TableHeader {
         grid-area: column-header;
+        position: absolute;
+        width: inherit;
+
+        .TableTitle {
+          text-align: center;
+        }
       }
 
       .TableBody {

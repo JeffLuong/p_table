@@ -4,12 +4,12 @@ export interface QunatifiableProps {
   sales: number;
   quantity: number;
   profit: number;
+  discount: number;
 }
 
 export interface BaseOrderNumProps extends QunatifiableProps {
   rowId: number;
   postalCode: number;
-  discount: number;
 }
 
 export interface BaseOrderStringProps {

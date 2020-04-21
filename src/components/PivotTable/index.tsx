@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import type { FormattedData } from './ProductSalesByStateTable';
+import type { FormattedData } from '../ProductSalesByStateTable';
 import './PivotTable.scss';
 
 type PivotTableProps = {
@@ -40,7 +40,7 @@ const prettifyNumber = (n: number): string => {
   const stringNums = n.toString().split('');
   return stringNums.map((s, i) => {
     if ((stringNums.length - i) % 3 === 0) {
-      return i === 0 ? s : `,${s}`;
+      return (i === 0 || (i === 1 && stringNums.includes('-'))) ? s : `,${s}`;
     }
     return s;
   }).join('');
@@ -132,7 +132,7 @@ const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
             {rowDims.toArray().map(([title, subDims]) => {
               return (
                 <React.Fragment key={title}>
-                  <Cell isCellGroup>
+                  <Cell isCellGroup className="TableRowDimensionTitle">
                     <Cell>
                       <span>{title}</span>
                     </Cell>

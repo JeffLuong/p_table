@@ -22,6 +22,15 @@ export type FormattedData = {
   colMetrics: OrderedMap<string | number, number[][]>;
 }
 
+const camelToSentenceCase = (str: string): string => {
+  return str
+    // Regex taken from https://gist.github.com/nblackburn/875e6ff75bc8ce171c758bf75f304707
+    .replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1 $2')
+    .split(' ')
+    .map(s => s.toUpperCase())
+    .join(' ');
+};
+
 /**
  * Create a positional column map of how many expected values per state per sub category.
  * For example, for one state, the expected positional map is:
@@ -126,17 +135,28 @@ const ProductSalesByStateTable = (): JSX.Element => {
   const [formattedData, setFormattedData] = useState<FormattedData>();
   const ordersRemoteVal = useSelector((state: AppState) => state.orders);
   const { value } = ordersRemoteVal;
-  const metric = 'sales';
+  // Data config for table: feel free to change these dimensions and metric with these rules:
+  // 1. Operation is always going to be 'sum'.
+  // 2. Dimensions should be configurable via any string data attribute.
+  // 3. Metric should be configurable via any of the number data attributes:
+  //   a. 'sales'
+  //   b. 'quantity'
+  //   c. 'profit'
+  //   d. 'discount'
+  const rowDimension = 'category';
+  const rowSubDimension = 'subCategory';
+  const colDimension = 'state';
+  const colMetric = 'sales';
 
   useEffect(() => {
     if (!value) {
       dispatch(fetchOrders());
     } else {
       setFormattedData(formatData(value, {
-        rowDimension: 'category',
-        rowSubDimension: 'subCategory',
-        colDimension: 'state',
-        colMetric: metric
+        rowDimension,
+        rowSubDimension,
+        colDimension,
+        colMetric
       }));
     }
   }, [dispatch, value]);
@@ -144,13 +164,13 @@ const ProductSalesByStateTable = (): JSX.Element => {
   if (formattedData) {
     const config = {
       rowTitle: 'Products',
-      colTitle: 'States',
-      rowDimTitle: 'Category',
-      rowDimSubTitle: 'Sub Category',
+      colTitle: camelToSentenceCase(colDimension),
+      rowDimTitle: camelToSentenceCase(rowDimension),
+      rowDimSubTitle: camelToSentenceCase(rowSubDimension),
       subResultText: 'Total',
       finalResultText: 'Grand Total',
       highlightLastColumn: true,
-      tableMetric: metric
+      tableMetric: colMetric
     };
     return <PivotTable tableConfig={config} data={formattedData} />;
   }
