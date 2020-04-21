@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppState } from '../redux/reducers';
-import { fetchOrders } from '../redux/actions/orders';
-import { Orders } from '../redux/reducers/orders';
-import Order, { OrderProps, QunatifiableProps, BaseOrderStringProps } from '../models/order';
+import { AppState } from '../../redux/reducers';
+import { fetchOrders } from '../../redux/actions/orders';
+import { Orders } from '../../redux/reducers/orders';
+import Order, { OrderProps, QunatifiableProps, BaseOrderStringProps } from '../../models/order';
 import { OrderedMap, Set } from 'immutable';
-import PivotTable from './PivotTable';
-import Loader from './Loader';
+import PivotTable from '../PivotTable';
+import Loader from '../Loader';
 
 const { useEffect, useState } = React;
 
