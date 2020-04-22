@@ -30,14 +30,14 @@ describe('<ProductSalesByStateTable>', () => {
       colMetric: 'sales'
     });
 
-    rowKeyValues.toArray().forEach(([category, values], i) => {
+    rowKeyValues.forEach(([category, values], i) => {
       expect(category).toBe(expectedCategories[i][0]);
-      values.toArray().forEach((val, j) => {
+      values.forEach((val, j) => {
         expect(val).toBe(expectedCategories[i][1][j]);
       })
     });
 
-    colMetrics.toArray().forEach(([state, metricsGroup], h) => {
+    colMetrics.forEach(([state, metricsGroup], h) => {
       expect(state).toBe(expectedMetrics[h][0]);
       metricsGroup.forEach((g, i) => {
         g.forEach((n, j) => {

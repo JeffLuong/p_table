@@ -1,17 +1,16 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { OrderedMap, Set } from 'immutable';
 import renderer from 'react-test-renderer';
 import { TableRowKeyValues, TableColumnMetrics, prettifyNumber } from './index';
 
 const rowSubResultText = 'Total';
-const rows = OrderedMap([
-  ['Homes', Set(['Condo', 'Townhouse', 'Semi-detached', 'Detached', 'Trailer'])],
-  ['Jobs', Set(['Engineer', 'Designer', 'Product Manager', 'Marketer', 'Customer Success', 'People Operations'])],
-  ['Vehicles', Set(['Sedan', 'Minivan', 'Pickup Truck', 'Sport'])],
-]);
+const rows: [string, string[]][] = [
+  ['Homes', ['Condo', 'Townhouse', 'Semi-detached', 'Detached', 'Trailer']],
+  ['Jobs', ['Engineer', 'Designer', 'Product Manager', 'Marketer', 'Customer Success', 'People Operations']],
+  ['Vehicles', ['Sedan', 'Minivan', 'Pickup Truck', 'Sport']],
+];
 
-const columns = OrderedMap([
+const columns: [string | number, number[][]][] = [
   ['Condo', [
       [13425, 621352, 634123, 42135, 21516],
       [9175123, 391723, 283615566, 21757],
@@ -30,7 +29,7 @@ const columns = OrderedMap([
       [461266, 8475, 1235, 5573]
     ]
   ]
-]);
+];
 
 describe('<PivotTable>', () => {
   describe('renders <TableRowKeyValues>', () => {
@@ -42,18 +41,16 @@ describe('<PivotTable>', () => {
     });
 
     it('with correct values', () => {
-      const wrapper = shallow(<TableRowKeyValues rows={rows} rowSubResultText={rowSubResultText} />); 
-      const expected = rows.toArray();
+      const wrapper = shallow(<TableRowKeyValues rows={rows} rowSubResultText={rowSubResultText} />);
       const values = wrapper.find('span');
       let valIdx = 0;
 
-      expected.forEach(([cat, subCats]) => {
-        const _subCats = subCats.toArray();
+      rows.forEach(([cat, subCats]) => {
         const catVal = values.get(valIdx);
         expect(catVal && catVal.props.children).toBe(cat);
         valIdx += 1;
 
-        _subCats.forEach(s => {
+        subCats.forEach(s => {
           const val = values.get(valIdx);
           expect(val && val.props.children).toBe(s);
           valIdx += 1;
@@ -62,7 +59,7 @@ describe('<PivotTable>', () => {
 
       wrapper.find('TableRowSubResult').forEach((w, i) => {
         const resultText = w.dive().find('span').text();
-        expect(resultText).toBe(`${expected[i][0]} ${rowSubResultText}`);
+        expect(resultText).toBe(`${rows[i][0]} ${rowSubResultText}`);
       });
     });
   });
@@ -77,11 +74,10 @@ describe('<PivotTable>', () => {
 
     it('with correct values', () => {
       const wrapper = shallow(<TableColumnMetrics columns={columns} />); 
-      const expected = columns.toArray();
       const values = wrapper.find('span');
       let valIdx = 0;
 
-      expected.forEach(([title, cols], i) => {
+      columns.forEach(([title, cols], i) => {
         expect(wrapper.find('TableColumnTitle').get(i).props.children).toBe(title);
 
         cols.forEach(metrics => {
