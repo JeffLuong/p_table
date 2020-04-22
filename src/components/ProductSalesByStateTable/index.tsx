@@ -66,19 +66,17 @@ export const formatData = (data: Orders, config: DataConfig): FormattedData => {
       orders.map(o => o.get(rowSubKey)).toSet().sort() // return all unique sub categories using `.toSet()`
     ]).toOrderedMap();
 
-  // Sorted + grouped by state and sorted + grouped by category
-  const sortedGroupedByKeys = data
-    .groupBy(o => o.get(colKey)).sortBy((v, k) => k)
-    .map(state => state.groupBy(o => o.get(rowKey)).sortBy((val, k) => k));
-
-  // Sales by sub category for each state. See line 62 for example of the data shape
+  // Sales by sub category for each state.
   const _rowKeyValues = rowKeyValues.map(a => a.toArray()).toArray();
   // Positional mapping of grand totals by sub category - to be inserted as the last column of metrics.
   const grandTotals = createColumnMap(_rowKeyValues);
   let grandTotal = 0;
 
   // The positional mapping of states vs total sales per category, sub category and grand totals.
-  const colMetrics = sortedGroupedByKeys
+  // Sorted + grouped by state and sorted + grouped by category.
+  const colMetrics = data
+    .groupBy(o => o.get(colKey)).sortBy((v, k) => k)
+    .map(state => state.groupBy(o => o.get(rowKey)).sortBy((val, k) => k))
     .map(state => {
       const initialAccumulator = createColumnMap(_rowKeyValues);
       let stateGrandTotal = 0;
@@ -173,9 +171,9 @@ const ProductSalesByStateTable = (): JSX.Element => {
       subResultText: 'Total',
       finalResultText: 'Grand Total',
       highlightLastColumn: true,
-      tableMetric: colMetric
+      metric: colMetric
     };
-    return <PivotTable tableConfig={config} data={formattedData} />;
+    return <PivotTable config={config} data={formattedData} />;
   }
 
   return <Loader />;

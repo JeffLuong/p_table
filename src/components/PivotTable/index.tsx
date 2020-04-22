@@ -5,7 +5,7 @@ import './PivotTable.scss';
 
 type PivotTableProps = {
   data: FormattedData;
-  tableConfig: {
+  config: {
     rowTitle: string;
     colTitle: string;
     rowKeyTitle: string;
@@ -13,7 +13,7 @@ type PivotTableProps = {
     subResultText: string;
     finalResultText: string;
     highlightLastColumn?: boolean;
-    tableMetric: string;
+    metric: string;
   };
 };
 
@@ -91,22 +91,25 @@ export const TableRowKeyValues = ({
   rows: RowKeyValues;
   rowSubResultText: string;
 }): JSX.Element => {
-  const rowDimValues = rows.toArray().map(([title, subDims]) => {
-    return (
-      <React.Fragment key={title}>
-        <Cell isCellGroup className="TableRowKeyTitle">
-          <Cell>
-            <span>{title}</span>
-          </Cell>
-          <Cell noPadding>
-            {subDims.map(d => <Cell key={d}><span>{d}</span></Cell>)}
-          </Cell>
-        </Cell>
-        <TableRowSubResult>{`${title} ${rowSubResultText}`}</TableRowSubResult>
-      </React.Fragment>
-    );
-  });
-  return <>{rowDimValues}</>;
+  return (
+    <>
+      {rows.toArray().map(([title, subDims]) => {
+        return (
+          <React.Fragment key={title}>
+            <Cell isCellGroup className="TableRowKeyTitle">
+              <Cell>
+                <span>{title}</span>
+              </Cell>
+              <Cell noPadding>
+                {subDims.map(d => <Cell key={d}><span>{d}</span></Cell>)}
+              </Cell>
+            </Cell>
+            <TableRowSubResult>{`${title} ${rowSubResultText}`}</TableRowSubResult>
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
 };
 
 export const TableColumnMetrics = ({
@@ -116,39 +119,42 @@ export const TableColumnMetrics = ({
   columns: ColumnMetrics;
   highlightLastColumn?: boolean;
 }): JSX.Element => {
-  const colDimValues = columns.toArray().map(([key, v], index) => {
-    const finalResultIdx = v.length - 1;
-    // By state
-    return (
-      <TableColumn key={key}>
-        <TableColumnTitle>
-          {key}
-        </TableColumnTitle>
-        {v.map((_v, idx) => {
-          // By Category
-          return _v.map((n, i) => {
-            // Sub category totals
-            const className = (highlightLastColumn && columns.size - 1 === index) ? 'isHighlighted' : ''
-            let Component = i === _v.length - 1 ? TableRowSubResult : Cell;
-            if (finalResultIdx === idx) {
-              Component = TableRowFinalResult;
-            }
-            return (
-              <React.Fragment key={`${key}-${n.toString()}-${i}`}>
-                <Component className={className}>
-                  <span>{prettifyNumber(n)}</span>
-                </Component>
-              </React.Fragment>
-            );
-          })
-        })}
-      </TableColumn>
-    )
-  });
-  return <>{colDimValues}</>;
+  return (
+    <>
+      {columns.toArray().map(([key, v], index) => {
+        const finalResultIdx = v.length - 1;
+        // By state
+        return (
+          <TableColumn key={key}>
+            <TableColumnTitle>
+              {key}
+            </TableColumnTitle>
+            {v.map((_v, idx) => {
+              // By Category
+              return _v.map((n, i) => {
+                // Sub category totals
+                const className = (highlightLastColumn && columns.size - 1 === index) ? 'isHighlighted' : ''
+                let Component = i === _v.length - 1 ? TableRowSubResult : Cell;
+                if (finalResultIdx === idx) {
+                  Component = TableRowFinalResult;
+                }
+                return (
+                  <React.Fragment key={`${key}-${n.toString()}-${i}`}>
+                    <Component className={className}>
+                      <span>{prettifyNumber(n)}</span>
+                    </Component>
+                  </React.Fragment>
+                );
+              })
+            })}
+          </TableColumn>
+        )
+      })}
+    </>
+  );
 };
 
-const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
+const PivotTable = ({ data, config }: PivotTableProps): JSX.Element => {
   const { rowKeyValues, colMetrics } = data;
   const {
     rowTitle,
@@ -158,11 +164,11 @@ const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
     subResultText,
     finalResultText,
     highlightLastColumn,
-    tableMetric
-  } = tableConfig;
+    metric
+  } = config;
   return (
     <div className="TableContainer">
-      <TableName>Sum of {tableMetric}</TableName>
+      <TableName>Sum of {metric}</TableName>
       <Table>
         <TableRowKeys>
           <TableHeader>
