@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import {
   REQUEST_ORDERS_REQUEST,
   REQUEST_ORDERS_SUCCESS,
@@ -58,21 +57,21 @@ const mockOrders = [{
 describe('actions/orders', () => {
   it('onRequestOrders', () => {
     const { type, payload } = onRequestOrders();
-    expect(type).to.be(REQUEST_ORDERS_REQUEST);
-    expect(payload).to.be(undefined);
+    expect(type).toBe(REQUEST_ORDERS_REQUEST);
+    expect(payload).toBe(undefined);
   });
 
   it('onOrdersReqSuccess', () => {
     const { type, payload } = onOrdersReqSuccess(mockOrders);
     const orders = payload && payload.orders;
-    expect(type).to.be(REQUEST_ORDERS_SUCCESS);
-    expect(orders).to.be(mockOrders);
+    expect(type).toBe(REQUEST_ORDERS_SUCCESS);
+    expect(orders).toBe(mockOrders);
   });
 
   it('onOrdersReqSuccess', () => {
     const { type, payload } = onOrdersReqFailure(new Error('Failed'));
     const error = payload && payload.error;
-    expect(type).to.be(REQUEST_ORDERS_FAILURE);
-    expect(error && error.message).to.be('Failed');
+    expect(type).toBe(REQUEST_ORDERS_FAILURE);
+    expect(error && error.message).toBe('Failed');
   });
 });

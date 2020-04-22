@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import Order from './order';
 
 describe('models/order', () => {
@@ -14,7 +13,7 @@ describe('models/order', () => {
     };
     const order = Order.fromService(props);
 
-    expect(order.toJS()).to.eql({
+    expect(order.toJS()).toMatchObject({
       orderDate: '',
       shipDate: '',
       shipMode: '',

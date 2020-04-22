@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import { REQUEST_ORDERS_REQUEST, REQUEST_ORDERS_SUCCESS, REQUEST_ORDERS_FAILURE } from '../actions/orders';
 import ordersReducer, { defaultErrorMsg, extractError } from './orders';
 import RemoteValue from '../../lib/RemoteValue';
@@ -13,7 +12,7 @@ describe('reducers/orders', () => {
           error: new Error('Whoops!')
         }
       });
-      expect(error).to.be('Whoops!');
+      expect(error).toBe('Whoops!');
     });
 
     it('without proper Error', () => {
@@ -23,7 +22,7 @@ describe('reducers/orders', () => {
           error: undefined
         }
       });
-      expect(error).to.be(defaultErrorMsg);
+      expect(error).toBe(defaultErrorMsg);
     });
   });
 
@@ -33,11 +32,11 @@ describe('reducers/orders', () => {
       { type: REQUEST_ORDERS_REQUEST }
     );
     const { value, isFetching, didEverLoad, didInvalidate, error } = state;
-    expect(value).to.be(undefined);
-    expect(isFetching).to.be(true);
-    expect(didEverLoad).to.be(false);
-    expect(didInvalidate).to.be(false);
-    expect(error).to.be('');
+    expect(value).toBe(undefined);
+    expect(isFetching).toBe(true);
+    expect(didEverLoad).toBe(false);
+    expect(didInvalidate).toBe(false);
+    expect(error).toBe('');
   });
 
   it('REQUEST_ORDERS_SUCCESS - returns expected state', () => {
@@ -97,13 +96,13 @@ describe('reducers/orders', () => {
       }
     );
     const { value, isFetching, didEverLoad, didInvalidate, error } = state;
-    expect(isFetching).to.be(false);
-    expect(didEverLoad).to.be(true);
-    expect(didInvalidate).to.be(false);
-    expect(error).to.be('');
+    expect(isFetching).toBe(false);
+    expect(didEverLoad).toBe(true);
+    expect(didInvalidate).toBe(false);
+    expect(error).toBe('');
     value.forEach((o: Order, i: number) => {
       o.toSeq().forEach((value, key) => {
-        expect(value).to.be(orders[i][key]);
+        expect(value).toBe(orders[i][key]);
       });
     });
   });
@@ -114,10 +113,10 @@ describe('reducers/orders', () => {
       { type: REQUEST_ORDERS_FAILURE, payload: { error: new Error('Borked!') } }
     );
     const { value, isFetching, didEverLoad, didInvalidate, error } = state;
-    expect(value).to.be(undefined);
-    expect(isFetching).to.be(false);
-    expect(didEverLoad).to.be(false);
-    expect(didInvalidate).to.be(false);
-    expect(error).to.be('Borked!');
+    expect(value).toBe(undefined);
+    expect(isFetching).toBe(false);
+    expect(didEverLoad).toBe(false);
+    expect(didInvalidate).toBe(false);
+    expect(error).toBe('Borked!');
   });
 });
