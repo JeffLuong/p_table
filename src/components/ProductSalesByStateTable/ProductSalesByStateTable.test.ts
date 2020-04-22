@@ -23,14 +23,14 @@ describe('<ProductSalesByStateTable>', () => {
       ['Grand Total', [[987, 82, 1069], [415, 1017, 479, 1911], [2980]]]
     ];
 
-    const { rowDims, colMetrics } = formatData(data, {
-      rowDimension: 'category',
-      rowSubDimension: 'subCategory',
-      colDimension: 'state',
+    const { rowKeyValues, colMetrics } = formatData(data, {
+      rowKey: 'category',
+      rowSubKey: 'subCategory',
+      colKey: 'state',
       colMetric: 'sales'
     });
 
-    rowDims.toArray().forEach(([category, values], i) => {
+    rowKeyValues.toArray().forEach(([category, values], i) => {
       expect(category).toBe(expectedCategories[i][0]);
       values.toArray().forEach((val, j) => {
         expect(val).toBe(expectedCategories[i][1][j]);

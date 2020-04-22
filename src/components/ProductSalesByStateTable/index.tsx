@@ -11,18 +11,18 @@ import Loader from '../Loader';
 const { useEffect, useState } = React;
 
 type DataConfig = {
-  rowDimension: keyof BaseOrderStringProps;
-  rowSubDimension: keyof BaseOrderStringProps;
-  colDimension: keyof OrderProps;
+  rowKey: keyof BaseOrderStringProps;
+  rowSubKey: keyof BaseOrderStringProps;
+  colKey: keyof OrderProps;
   colMetric: keyof QunatifiableProps;
 };
 
-export type RowDimensionValues = OrderedMap<string, Set<string>>;
-export type ColumnDimensionValues = OrderedMap<string | number, number[][]>;
+export type RowKeyValues = OrderedMap<string, Set<string>>;
+export type ColumnMetrics = OrderedMap<string | number, number[][]>;
 
 export type FormattedData = {
-  rowDims: RowDimensionValues;
-  colMetrics: ColumnDimensionValues;
+  rowKeyValues: RowKeyValues;
+  colMetrics: ColumnMetrics;
 }
 
 const camelToSentenceCase = (str: string): string => {
@@ -57,55 +57,55 @@ const createColumnMap = (nestedArr: [string, string[]][]): number[][] => {
 };
 
 export const formatData = (data: Orders, config: DataConfig): FormattedData => {
-  const { rowDimension, rowSubDimension, colDimension, colMetric } = config;
-  const rowDims = data
-    .groupBy(o => o.get(rowDimension))
+  const { rowKey, rowSubKey, colKey, colMetric } = config;
+  const rowKeyValues = data
+    .groupBy(o => o.get(rowKey))
     .sortBy((v, k) => k) // Group data by category
-    .mapEntries(([dim, orders]) => [
-      dim,
-      orders.map(o => o.get(rowSubDimension)).toSet().sort() // return all unique sub categories using `.toSet()`
+    .mapEntries(([key, orders]) => [
+      key,
+      orders.map(o => o.get(rowSubKey)).toSet().sort() // return all unique sub categories using `.toSet()`
     ]).toOrderedMap();
 
   // Sorted + grouped by state and sorted + grouped by category
-  const sortedGroupedByDim = data
-    .groupBy(o => o.get(colDimension)).sortBy((v, k) => k)
-    .map(state => state.groupBy(o => o.get(rowDimension)).sortBy((val, k) => k));
+  const sortedGroupedByKeys = data
+    .groupBy(o => o.get(colKey)).sortBy((v, k) => k)
+    .map(state => state.groupBy(o => o.get(rowKey)).sortBy((val, k) => k));
 
   // Sales by sub category for each state. See line 62 for example of the data shape
-  const _rowDims = rowDims.map(a => a.toArray()).toArray();
+  const _rowKeyValues = rowKeyValues.map(a => a.toArray()).toArray();
   // Positional mapping of grand totals by sub category - to be inserted as the last column of metrics.
-  const grandTotals = createColumnMap(_rowDims);
+  const grandTotals = createColumnMap(_rowKeyValues);
   let grandTotal = 0;
 
   // The positional mapping of states vs total sales per category, sub category and grand totals.
-  const colMetrics = sortedGroupedByDim
+  const colMetrics = sortedGroupedByKeys
     .map(state => {
-      const initialAccumulator = createColumnMap(_rowDims);
+      const initialAccumulator = createColumnMap(_rowKeyValues);
       let stateGrandTotal = 0;
 
       const reducedTotals = state.reduce((accTotals, orders) => {
         // Get current category: i.e. 'Furniture'
         const order: Order = orders.first();
-        const currDim = order && order.get(rowDimension);
+        const currKey = order && order.get(rowKey);
         // Get the current `OrderedSet` associated with category: i.e OrderedSet(['Bookcases', 'Chairs', 'Furnishings', ...])
-        const curr = _rowDims.find(arr => arr.includes(currDim));
+        const curr = _rowKeyValues.find(arr => arr.includes(currKey));
         const currSet = curr && curr[1];
-        const currSetIdx = curr && _rowDims.indexOf(curr);
+        const currSetIdx = curr && _rowKeyValues.indexOf(curr);
         // The initial array to use in reducing totals by sub categories selected from total state accumulated map
         const initialTotals: number[] = (((currSetIdx !== undefined) && initialAccumulator[currSetIdx]) || []);
 
-        orders.groupBy(o => o.get(rowSubDimension)).sortBy((val, k) => k).reduce((totals: number[], orders, subDim) => {
+        orders.groupBy(o => o.get(rowSubKey)).sortBy((val, k) => k).reduce((totals: number[], orders, subKey) => {
           // Get the index of current sub category in the current `OrderedSet`: i.e. index of 'Bookcases'
-          const subDimIndex = currSet && currSet.indexOf(subDim);
+          const subKeyIndex = currSet && currSet.indexOf(subKey);
           const total = Math.round(orders.reduce((sub, order) => sub += (order.get(colMetric) || 0), 0));
-          if (subDimIndex !== undefined) {
+          if (subKeyIndex !== undefined) {
             // Replace the total in the correct index
-            totals[subDimIndex] = total;
+            totals[subKeyIndex] = total;
           }
           // Increment the category's sub total (i.e. all Furniture category total for a state)
           totals[totals.length - 1] += total;
-          if (currSetIdx !== undefined && subDimIndex !== undefined) {
-            grandTotals[currSetIdx][subDimIndex] += total;
+          if (currSetIdx !== undefined && subKeyIndex !== undefined) {
+            grandTotals[currSetIdx][subKeyIndex] += total;
             grandTotals[currSetIdx][totals.length - 1] += total;
           }
           // Increment the state's grand total
@@ -128,7 +128,7 @@ export const formatData = (data: Orders, config: DataConfig): FormattedData => {
     .set('Grand Total', grandTotals);
 
   return {
-    rowDims,
+    rowKeyValues,
     colMetrics
   };
 };
@@ -146,9 +146,9 @@ const ProductSalesByStateTable = (): JSX.Element => {
   //   b. 'quantity'
   //   c. 'profit'
   //   d. 'discount'
-  const rowDimension = 'category';
-  const rowSubDimension = 'subCategory';
-  const colDimension = 'state';
+  const rowKey = 'category';
+  const rowSubKey = 'subCategory';
+  const colKey = 'state';
   const colMetric = 'sales';
 
   useEffect(() => {
@@ -156,9 +156,9 @@ const ProductSalesByStateTable = (): JSX.Element => {
       dispatch(fetchOrders());
     } else {
       setFormattedData(formatData(value, {
-        rowDimension,
-        rowSubDimension,
-        colDimension,
+        rowKey,
+        rowSubKey,
+        colKey,
         colMetric
       }));
     }
@@ -167,9 +167,9 @@ const ProductSalesByStateTable = (): JSX.Element => {
   if (formattedData && ordersRemoteVal.loaded()) {
     const config = {
       rowTitle: 'Products',
-      colTitle: camelToSentenceCase(colDimension),
-      rowDimTitle: camelToSentenceCase(rowDimension),
-      rowDimSubTitle: camelToSentenceCase(rowSubDimension),
+      colTitle: camelToSentenceCase(colKey),
+      rowKeyTitle: camelToSentenceCase(rowKey),
+      rowSubKeyTitle: camelToSentenceCase(rowSubKey),
       subResultText: 'Total',
       finalResultText: 'Grand Total',
       highlightLastColumn: true,

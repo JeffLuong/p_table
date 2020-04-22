@@ -2,7 +2,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { OrderedMap, Set } from 'immutable';
 import renderer from 'react-test-renderer';
-import { TableRowDimensionValues, TableColumnDimensionValues, prettifyNumber } from './index';
+import { TableRowKeyValues, TableColumnMetrics, prettifyNumber } from './index';
 
 const rowSubResultText = 'Total';
 const rows = OrderedMap([
@@ -33,16 +33,16 @@ const columns = OrderedMap([
 ]);
 
 describe('<PivotTable>', () => {
-  describe('renders <TableRowDimensionValues>', () => {
+  describe('renders <TableRowKeyValues>', () => {
     it('with correct snapshot', () => {
       const componentTree = renderer.create(
-        <TableRowDimensionValues rows={rows} rowSubResultText={rowSubResultText} />
+        <TableRowKeyValues rows={rows} rowSubResultText={rowSubResultText} />
       ).toJSON();
       expect(componentTree).toMatchSnapshot();
     });
 
     it('with correct values', () => {
-      const wrapper = shallow(<TableRowDimensionValues rows={rows} rowSubResultText={rowSubResultText} />); 
+      const wrapper = shallow(<TableRowKeyValues rows={rows} rowSubResultText={rowSubResultText} />); 
       const expected = rows.toArray();
       const values = wrapper.find('span');
       let valIdx = 0;
@@ -67,16 +67,16 @@ describe('<PivotTable>', () => {
     });
   });
 
-  describe('renders <TableColumnDimensionValues>', () => {
+  describe('renders <TableColumnMetrics>', () => {
     it('with correct snapshot', () => {
       const componentTree = renderer.create(
-        <TableColumnDimensionValues columns={columns} />
+        <TableColumnMetrics columns={columns} />
       ).toJSON();
       expect(componentTree).toMatchSnapshot();
     });
 
     it('with correct values', () => {
-      const wrapper = shallow(<TableColumnDimensionValues columns={columns} />); 
+      const wrapper = shallow(<TableColumnMetrics columns={columns} />); 
       const expected = columns.toArray();
       const values = wrapper.find('span');
       let valIdx = 0;

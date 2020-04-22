@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import type { FormattedData, ColumnDimensionValues, RowDimensionValues } from '../ProductSalesByStateTable';
+import type { FormattedData, ColumnMetrics, RowKeyValues } from '../ProductSalesByStateTable';
 import './PivotTable.scss';
 
 type PivotTableProps = {
@@ -8,8 +8,8 @@ type PivotTableProps = {
   tableConfig: {
     rowTitle: string;
     colTitle: string;
-    rowDimTitle: string;
-    rowDimSubTitle: string;
+    rowKeyTitle: string;
+    rowSubKeyTitle: string;
     subResultText: string;
     finalResultText: string;
     highlightLastColumn?: boolean;
@@ -68,7 +68,7 @@ const TableColumnTitle = ({ children }: TDefProps): JSX.Element => <Cell><span c
 
 const TableBody = ({ children }: TDefProps): JSX.Element => <div className="TableBody">{children}</div>;
 
-const TableRowDimensions = ({ children }: TDefProps): JSX.Element => <div className="TableRowDimensions">{children}</div>;
+const TableRowKeys = ({ children }: TDefProps): JSX.Element => <div className="TableRowKeys">{children}</div>;
 
 const TableRowSubResult = ({ children, className }: TDefProps): JSX.Element => {
   return <Cell className={cx('TableRowSubResult', className)}><span>{children}</span></Cell>;
@@ -78,23 +78,23 @@ const TableRowFinalResult = ({ children, className }: TDefProps): JSX.Element =>
   return <Cell className={cx('TableRowFinalResult', className)}><span>{children}</span></Cell>;
 };
 
-const TableColumnDimensions = ({ children, scrollable }: TableColDimsWrapperProps): JSX.Element => {
-  return <div className={`TableColumnDimensions ${scrollable ? 'isScrollable' : ''}`}>{children}</div>;
+const TableColumns = ({ children, scrollable }: TableColDimsWrapperProps): JSX.Element => {
+  return <div className={`TableColumns ${scrollable ? 'isScrollable' : ''}`}>{children}</div>;
 };
 
 const TableColumn = ({ children }: TDefProps): JSX.Element => <div className="TableColumn">{children}</div>;
 
-export const TableRowDimensionValues = ({
+export const TableRowKeyValues = ({
   rows,
   rowSubResultText
 }: {
-  rows: RowDimensionValues;
+  rows: RowKeyValues;
   rowSubResultText: string;
 }): JSX.Element => {
   const rowDimValues = rows.toArray().map(([title, subDims]) => {
     return (
       <React.Fragment key={title}>
-        <Cell isCellGroup className="TableRowDimensionTitle">
+        <Cell isCellGroup className="TableRowKeyTitle">
           <Cell>
             <span>{title}</span>
           </Cell>
@@ -109,11 +109,11 @@ export const TableRowDimensionValues = ({
   return <>{rowDimValues}</>;
 };
 
-export const TableColumnDimensionValues = ({
+export const TableColumnMetrics = ({
   columns,
   highlightLastColumn
 }: {
-  columns: ColumnDimensionValues;
+  columns: ColumnMetrics;
   highlightLastColumn?: boolean;
 }): JSX.Element => {
   const colDimValues = columns.toArray().map(([key, v], index) => {
@@ -149,12 +149,12 @@ export const TableColumnDimensionValues = ({
 };
 
 const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
-  const { rowDims, colMetrics } = data;
+  const { rowKeyValues, colMetrics } = data;
   const {
     rowTitle,
     colTitle,
-    rowDimTitle,
-    rowDimSubTitle,
+    rowKeyTitle,
+    rowSubKeyTitle,
     subResultText,
     finalResultText,
     highlightLastColumn,
@@ -164,31 +164,31 @@ const PivotTable = ({ data, tableConfig }: PivotTableProps): JSX.Element => {
     <div className="TableContainer">
       <TableName>Sum of {tableMetric}</TableName>
       <Table>
-        <TableRowDimensions>
+        <TableRowKeys>
           <TableHeader>
             <TableTitle>{rowTitle.toLocaleUpperCase()}</TableTitle>
           </TableHeader>
           <TableBody>
             <Cell className="TableColumnTitleGroup" isCellGroup noPadding>
               <TableColumnTitle>
-                {rowDimTitle}
+                {rowKeyTitle}
               </TableColumnTitle>
               <TableColumnTitle>
-                {rowDimSubTitle}
+                {rowSubKeyTitle}
               </TableColumnTitle>
             </Cell>
-            <TableRowDimensionValues rows={rowDims} rowSubResultText={subResultText} />
+            <TableRowKeyValues rows={rowKeyValues} rowSubResultText={subResultText} />
             <TableRowFinalResult>{finalResultText}</TableRowFinalResult>
           </TableBody>
-        </TableRowDimensions>
-        <TableColumnDimensions scrollable>
+        </TableRowKeys>
+        <TableColumns scrollable>
           <TableHeader>
             <TableTitle>{colTitle.toLocaleUpperCase()}</TableTitle>
           </TableHeader>
           <TableBody>
-            <TableColumnDimensionValues columns={colMetrics} highlightLastColumn={highlightLastColumn} />
+            <TableColumnMetrics columns={colMetrics} highlightLastColumn={highlightLastColumn} />
           </TableBody>
-        </TableColumnDimensions>
+        </TableColumns>
       </Table>
     </div>
   );
