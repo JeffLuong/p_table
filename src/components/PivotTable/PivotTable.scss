@@ -4,6 +4,13 @@ $white: #ffffff;
   position: relative;
 
   $table-name__height: 65px;
+  $header__background-color: #032873;
+  $row-dim__width: 25rem;
+  $row-dim-sub-result__background-color: #eeeeee;
+  $row-dim-sub-result__border-color: #dddddd;
+  $row-dim-final-result__background-color: #333333;
+  $col-title-text__color: #b3bed5;
+  $font-weight-heavy: 700;
 
   .TableName {
     background-color: #02205c;
@@ -20,13 +27,6 @@ $white: #ffffff;
   .Table {
     display: flex;
     width: 100%;
-
-    $header__background-color: #032873;
-    $row-dim__width: 25rem;
-    $row-dim-sub-result__background-color: #eeeeee;
-    $row-dim-sub-result__border-color: #dddddd;
-    $row-dim-final-result__background-color: #333333;
-    $col-title-text__color: #b3bed5;
 
     .TableRowSubResult {
       background-color: $row-dim-sub-result__background-color;
@@ -62,7 +62,7 @@ $white: #ffffff;
     }
 
     .TableRowKeyTitle > .Cell:first-of-type span {
-      font-weight: 700;
+      font-weight: $font-weight-heavy;
 
       &::before {
         background-color: #0C66BF;
@@ -100,6 +100,7 @@ $white: #ffffff;
 
       > span {
         color: $white;
+        font-weight: $font-weight-heavy;
       }
 
       &.isHighlighted {
@@ -165,7 +166,8 @@ $white: #ffffff;
     }
 
     &.isHighlighted {
-      background-color: #f2f2f2
+      background-color: #f2f2f2;
+      font-weight: $font-weight-heavy;
     }
   }
 }
