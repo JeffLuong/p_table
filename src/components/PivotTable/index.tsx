@@ -93,7 +93,7 @@ export const TableRowKeyValues = ({
 }): JSX.Element => {
   return (
     <>
-      {rows.toArray().map(([title, subDims]) => {
+      {rows.map(([title, subDims]) => {
         return (
           <React.Fragment key={title}>
             <Cell isCellGroup className="TableRowKeyTitle">
@@ -121,7 +121,7 @@ export const TableColumnMetrics = ({
 }): JSX.Element => {
   return (
     <>
-      {columns.toArray().map(([key, v], index) => {
+      {columns.map(([key, v], index) => {
         const finalResultIdx = v.length - 1;
         // By state
         return (
@@ -133,7 +133,7 @@ export const TableColumnMetrics = ({
               // By Category
               return _v.map((n, i) => {
                 // Sub category totals
-                const className = (highlightLastColumn && columns.size - 1 === index) ? 'isHighlighted' : ''
+                const className = (highlightLastColumn && columns.length - 1 === index) ? 'isHighlighted' : ''
                 let Component = i === _v.length - 1 ? TableRowSubResult : Cell;
                 if (finalResultIdx === idx) {
                   Component = TableRowFinalResult;

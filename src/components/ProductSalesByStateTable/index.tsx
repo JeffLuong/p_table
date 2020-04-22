@@ -4,7 +4,6 @@ import { AppState } from '../../redux/reducers';
 import { fetchOrders } from '../../redux/actions/orders';
 import { Orders } from '../../redux/reducers/orders';
 import Order, { OrderProps, QunatifiableProps, BaseOrderStringProps } from '../../models/order';
-import { OrderedMap, Set } from 'immutable';
 import PivotTable from '../PivotTable';
 import Loader from '../Loader';
 
@@ -17,8 +16,8 @@ type DataConfig = {
   colMetric: keyof QunatifiableProps;
 };
 
-export type RowKeyValues = OrderedMap<string, Set<string>>;
-export type ColumnMetrics = OrderedMap<string | number, number[][]>;
+export type RowKeyValues = [string, string[]][];
+export type ColumnMetrics = [string | number, number[][]][];
 
 export type FormattedData = {
   rowKeyValues: RowKeyValues;
@@ -35,24 +34,26 @@ const camelToSentenceCase = (str: string): string => {
 };
 
 /**
- * Create a positional column map of how many expected values per state per sub category.
- * For example, for one state, the expected positional map is:
- * [['Furniture', ['Bookshelves', 'Chaires', ...etc]],   <--- 4 sub categories
- *  ['Office Supplies', ['Appliances', 'Art', ...etc]],  <--- 9 sub categories
- *  ['Technology', ['Accessories', 'Copiers', ...etc]]]  <--- 4 sub categories
+ * Create a positional column map of how many expected sales values per state per sub category.
+ * Also include one more positional column for state sales total.
+ * Example - for one state, the expected positional map is:
+ * [[Bookshelves, Chaires, ...etc],  <--- 4 sub categories + 1 position for sub total
+ *  [Appliances, Art, ...etc],       <--- 9 sub categories + 1 position for sub total
+ *  [Accessories, Copiers, ...etc],  <--- 4 sub categories + 1 position for sub total
+ *  [StateTotal]]                    <--- 1 state total
  */
 const createColumnMap = (nestedArr: [string, string[]][]): number[][] => {
   const columnMap: number[][] = [];
-  for (let x = 0; x < nestedArr.length; x++) {
+  nestedArr.forEach(([, arr], i) => {
     // For each sub category, push in the required positions, including an entry for totals for each category.
-    const sub: number[]  = [0];
-    nestedArr[x][1].forEach(() => sub.push(0));
+    const sub: number[] = [0];
+    arr.forEach(() => sub.push(0));
     columnMap.push(sub);
     // Adding another array entry to hold grand total for all state
-    if (x === nestedArr.length - 1) {
+    if (i === nestedArr.length - 1) {
       columnMap.push([0]);
     }
-  }
+  });
   return columnMap;
 };
 
@@ -63,13 +64,12 @@ export const formatData = (data: Orders, config: DataConfig): FormattedData => {
     .sortBy((v, k) => k) // Group data by category
     .mapEntries(([key, orders]) => [
       key,
-      orders.map(o => o.get(rowSubKey)).toSet().sort() // return all unique sub categories using `.toSet()`
-    ]).toOrderedMap();
+      orders.map(o => o.get(rowSubKey)).toSet().sort().toArray() // return all unique sub categories using `.toSet()`
+    ])
+    .toArray();
 
-  // Sales by sub category for each state.
-  const _rowKeyValues = rowKeyValues.map(a => a.toArray()).toArray();
   // Positional mapping of grand totals by sub category - to be inserted as the last column of metrics.
-  const grandTotals = createColumnMap(_rowKeyValues);
+  const grandTotals = createColumnMap(rowKeyValues);
   let grandTotal = 0;
 
   // The positional mapping of states vs total sales per category, sub category and grand totals.
@@ -78,17 +78,17 @@ export const formatData = (data: Orders, config: DataConfig): FormattedData => {
     .groupBy(o => o.get(colKey)).sortBy((v, k) => k)
     .map(state => state.groupBy(o => o.get(rowKey)).sortBy((val, k) => k))
     .map(state => {
-      const initialAccumulator = createColumnMap(_rowKeyValues);
+      const initialAccumulator = createColumnMap(rowKeyValues);
       let stateGrandTotal = 0;
 
       const reducedTotals = state.reduce((accTotals, orders) => {
         // Get current category: i.e. 'Furniture'
         const order: Order = orders.first();
         const currKey = order && order.get(rowKey);
-        // Get the current `OrderedSet` associated with category: i.e OrderedSet(['Bookcases', 'Chairs', 'Furnishings', ...])
-        const curr = _rowKeyValues.find(arr => arr.includes(currKey));
+        // Get the current array associated with category: i.e ['Bookcases', 'Chairs', 'Furnishings', ...]
+        const curr = rowKeyValues.find(arr => arr.includes(currKey));
         const currSet = curr && curr[1];
-        const currSetIdx = curr && _rowKeyValues.indexOf(curr);
+        const currSetIdx = curr && rowKeyValues.indexOf(curr);
         // The initial array to use in reducing totals by sub categories selected from total state accumulated map
         const initialTotals: number[] = (((currSetIdx !== undefined) && initialAccumulator[currSetIdx]) || []);
 
@@ -120,10 +120,9 @@ export const formatData = (data: Orders, config: DataConfig): FormattedData => {
       grandTotals[grandTotals.length - 1] = [grandTotal];
       return reducedTotals;
     })
-     // Typescript complains that `set()` isn't defined in `Seq.Keyed`
-     // (even though it is) so using `toOrderedMap()` to satisfy it :(
-    .toOrderedMap()
-    .set('Grand Total', grandTotals);
+    .toArray();
+    // Insert last column which is grand totals for each sub category per state and overall grand total.
+    colMetrics.push(['Grand Total', grandTotals]);
 
   return {
     rowKeyValues,
@@ -162,7 +161,7 @@ const ProductSalesByStateTable = (): JSX.Element => {
     }
   }, [dispatch, value]);
 
-  if (formattedData && ordersRemoteVal.loaded()) {
+  if (ordersRemoteVal.loaded() && formattedData) {
     const config = {
       rowTitle: 'Products',
       colTitle: camelToSentenceCase(colKey),
