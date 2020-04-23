@@ -1,10 +1,12 @@
 import * as React from 'react';
 import cx from 'classnames';
+import styled, { DefaultTheme, ThemeConsumer } from 'styled-components';
 import type { FormattedData, ColumnMetrics, RowKeyValues } from '../ProductSalesByStateTable';
 import './PivotTable.scss';
 
 type PivotTableProps = {
   data: FormattedData;
+  toggleTheme: () => void;
   config: {
     rowTitle: string;
     colTitle: string;
@@ -12,7 +14,6 @@ type PivotTableProps = {
     rowSubKeyTitle: string;
     subResultText: string;
     finalResultText: string;
-    highlightLastColumn?: boolean;
     metric: string;
   };
 };
@@ -20,6 +21,7 @@ type PivotTableProps = {
 type TDefProps = {
   children: React.ReactNode;
   className?: string;
+  style?: {};
 };
 
 interface TableColDimsWrapperProps extends TDefProps {
@@ -29,6 +31,10 @@ interface TableColDimsWrapperProps extends TDefProps {
 interface CellProps extends TDefProps {
   isCellGroup?: boolean;
   noPadding?: boolean;
+}
+
+interface ThemedProps extends TDefProps {
+  theme: DefaultTheme;
 }
 
 /**
@@ -46,7 +52,7 @@ export const prettifyNumber = (n: number): string => {
   }).join('');
 };
 
-const Cell = ({ className, isCellGroup, children, noPadding, ...rest }: CellProps): JSX.Element => {
+const BaseCell = ({ className, isCellGroup, children, noPadding, ...rest }: CellProps): JSX.Element => {
   const classes = cx(
     'Cell',
     isCellGroup ? 'CellGroup' : '',
@@ -56,27 +62,104 @@ const Cell = ({ className, isCellGroup, children, noPadding, ...rest }: CellProp
   return <div className={classes} {...rest}>{children}</div>;
 };
 
+const Cell = styled(BaseCell)`
+  ${({ theme }: ThemedProps): string => {
+    return `
+      background-color: ${theme.cell.bg};
+
+      &.isHighlighted {
+        background-color: ${theme.cell.accentBg};
+        font-weight: 700;
+      }
+    `;
+  }};
+`;
+
+const Button = styled.button`
+  transition: background-color .125s ease-in-out;
+  height: 100%;
+  background-color: transparent;
+  color: white;
+  border-color: white;
+  padding: .5rem 1.25rem;
+  font-weight: 600;
+  font-size: .75rem;
+  border-radius: .25rem;
+  cursor: pointer;
+  outline: none;
+  border-style: solid;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, .175);
+  }
+`;
+
+const BaseTableContainer = ({ children, className }: TDefProps): JSX.Element => (
+  <div className={cx('TableContainer', className)}>{children}</div>
+);
+
+const TableContainer = styled(BaseTableContainer)`
+  background-color: ${({ theme }: ThemedProps): string => theme.tableBg};
+`;
+
+const Span = styled.span`
+  color: ${({ theme }: ThemedProps): string => theme.text.body};
+`;
+
 const Table = ({ children }: TDefProps): JSX.Element => <div className="Table">{children}</div>;
 
-const TableName = ({ children }: TDefProps): JSX.Element => <div className="TableName"><h1>{children}</h1></div>;
+const TableName = ({ children }: TDefProps): JSX.Element => <div className="TableName">{children}</div>;
 
 const TableHeader = ({ children }: TDefProps): JSX.Element => <div className="TableHeader">{children}</div>;
 
 const TableTitle = ({ children }: TDefProps): JSX.Element => <Cell><h3 className="TableTitle">{children}</h3></Cell>;
 
-const TableColumnTitle = ({ children }: TDefProps): JSX.Element => <Cell><span className="TableColumnTitle">{children}</span></Cell>;
+const TableColumnTitle = ({ children }: TDefProps): JSX.Element => (
+  <Cell><Span className="TableColumnTitle">{children}</Span></Cell>
+);
 
 const TableBody = ({ children }: TDefProps): JSX.Element => <div className="TableBody">{children}</div>;
 
 const TableRowKeys = ({ children }: TDefProps): JSX.Element => <div className="TableRowKeys">{children}</div>;
 
-const TableRowSubResult = ({ children, className }: TDefProps): JSX.Element => {
-  return <Cell className={cx('TableRowSubResult', className)}><span>{children}</span></Cell>;
+const BaseTableRowSubResult = ({ children, className }: TDefProps): JSX.Element => {
+  return <Cell className={cx('TableRowSubResult', className)}><Span>{children}</Span></Cell>;
 };
 
-const TableRowFinalResult = ({ children, className }: TDefProps): JSX.Element => {
-  return <Cell className={cx('TableRowFinalResult', className)}><span>{children}</span></Cell>;
+const TableRowSubResult = styled(BaseTableRowSubResult)`
+  ${({ theme }: ThemedProps): string => {
+    return `
+      background-color: ${theme.cell.accentBg};
+
+      &.isHighlighted {
+        background-color: ${theme.cell.primaryHighlightBg};
+        content: 'SUB-RESULT';
+        font-weight: 700;
+      }
+    `;
+  }};
+`;
+
+const BaseTableRowFinalResult = ({ children, className, style }: TDefProps): JSX.Element => {
+  return <Cell style={style} className={cx('TableRowFinalResult', className)}>{children}</Cell>;
 };
+
+const TableRowFinalResult = styled(BaseTableRowFinalResult)`
+  ${({ theme }: ThemedProps): string => {
+    return `
+      background-color: ${theme.cell.secondaryHighlightBg};
+      content: 'FINAL-RESULT';
+
+      &.isHighlighted {
+        background-color: ${theme.cell.secondaryHighlightBg};
+      }
+
+      > span {
+        font-weight: 700;
+      }
+    `;
+  }}
+`;
 
 const TableColumns = ({ children, scrollable }: TableColDimsWrapperProps): JSX.Element => {
   return <div className={`TableColumns ${scrollable ? 'isScrollable' : ''}`}>{children}</div>;
@@ -98,13 +181,15 @@ export const TableRowKeyValues = ({
           <React.Fragment key={title}>
             <Cell isCellGroup className="TableRowKeyTitle">
               <Cell>
-                <span>{title}</span>
+                <Span>{title}</Span>
               </Cell>
               <Cell noPadding>
-                {subDims.map(d => <Cell key={d}><span>{d}</span></Cell>)}
+                {subDims.map(d => <Cell key={d}><Span>{d}</Span></Cell>)}
               </Cell>
             </Cell>
-            <TableRowSubResult>{`${title} ${rowSubResultText}`}</TableRowSubResult>
+            <TableRowSubResult>
+              <Span>{`${title} ${rowSubResultText}`}</Span>
+            </TableRowSubResult>
           </React.Fragment>
         );
       })}
@@ -113,11 +198,9 @@ export const TableRowKeyValues = ({
 };
 
 export const TableColumnMetrics = ({
-  columns,
-  highlightLastColumn
+  columns
 }: {
   columns: ColumnMetrics;
-  highlightLastColumn?: boolean;
 }): JSX.Element => {
   return (
     <>
@@ -133,7 +216,7 @@ export const TableColumnMetrics = ({
               // By Category
               return _v.map((n, i) => {
                 // Sub category totals
-                const className = (highlightLastColumn && columns.length - 1 === index) ? 'isHighlighted' : ''
+                const className = columns.length - 1 === index ? 'isHighlighted' : ''
                 let Component = i === _v.length - 1 ? TableRowSubResult : Cell;
                 if (finalResultIdx === idx) {
                   Component = TableRowFinalResult;
@@ -141,7 +224,7 @@ export const TableColumnMetrics = ({
                 return (
                   <React.Fragment key={`${key}-${n.toString()}-${i}`}>
                     <Component className={className}>
-                      <span>{prettifyNumber(n)}</span>
+                      <Span>{prettifyNumber(n)}</Span>
                     </Component>
                   </React.Fragment>
                 );
@@ -154,7 +237,7 @@ export const TableColumnMetrics = ({
   );
 };
 
-const PivotTable = ({ data, config }: PivotTableProps): JSX.Element => {
+const PivotTable = ({ data, config, toggleTheme }: PivotTableProps): JSX.Element => {
   const { rowKeyValues, colMetrics } = data;
   const {
     rowTitle,
@@ -163,40 +246,52 @@ const PivotTable = ({ data, config }: PivotTableProps): JSX.Element => {
     rowSubKeyTitle,
     subResultText,
     finalResultText,
-    highlightLastColumn,
     metric
   } = config;
   return (
-    <div className="TableContainer">
-      <TableName>Sum of {metric}</TableName>
-      <Table>
-        <TableRowKeys>
-          <TableHeader>
-            <TableTitle>{rowTitle.toLocaleUpperCase()}</TableTitle>
-          </TableHeader>
-          <TableBody>
-            <Cell className="TableColumnTitleGroup" isCellGroup noPadding>
-              <TableColumnTitle>
-                {rowKeyTitle}
-              </TableColumnTitle>
-              <TableColumnTitle>
-                {rowSubKeyTitle}
-              </TableColumnTitle>
-            </Cell>
-            <TableRowKeyValues rows={rowKeyValues} rowSubResultText={subResultText} />
-            <TableRowFinalResult>{finalResultText}</TableRowFinalResult>
-          </TableBody>
-        </TableRowKeys>
-        <TableColumns scrollable>
-          <TableHeader>
-            <TableTitle>{colTitle.toLocaleUpperCase()}</TableTitle>
-          </TableHeader>
-          <TableBody>
-            <TableColumnMetrics columns={colMetrics} highlightLastColumn={highlightLastColumn} />
-          </TableBody>
-        </TableColumns>
-      </Table>
-    </div>
+    <ThemeConsumer>
+      {(theme): JSX.Element => (
+        <TableContainer theme={theme}>
+          <TableName>
+            <h1>Sum of {metric}</h1>
+            <div>
+              <Button onClick={toggleTheme}>
+                Toggle Theme
+              </Button>
+            </div>
+          </TableName>
+          <Table>
+            <TableRowKeys>
+              <TableHeader>
+                <TableTitle>{rowTitle.toLocaleUpperCase()}</TableTitle>
+              </TableHeader>
+              <TableBody>
+                <Cell className="TableColumnTitleGroup" isCellGroup noPadding>
+                  <TableColumnTitle>
+                    {rowKeyTitle}
+                  </TableColumnTitle>
+                  <TableColumnTitle>
+                    {rowSubKeyTitle}
+                  </TableColumnTitle>
+                </Cell>
+                <TableRowKeyValues rows={rowKeyValues} rowSubResultText={subResultText} />
+                <TableRowFinalResult style={{ paddingBottom: '2rem' }}>
+                  <Span>{finalResultText}</Span>
+                </TableRowFinalResult>
+              </TableBody>
+            </TableRowKeys>
+            <TableColumns scrollable>
+              <TableHeader>
+                <TableTitle>{colTitle.toLocaleUpperCase()}</TableTitle>
+              </TableHeader>
+              <TableBody>
+                <TableColumnMetrics columns={colMetrics} />
+              </TableBody>
+            </TableColumns>
+          </Table>
+        </TableContainer>
+      )}
+    </ThemeConsumer>
   );
 };
 

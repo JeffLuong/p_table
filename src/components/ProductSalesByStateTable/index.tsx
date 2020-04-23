@@ -130,7 +130,7 @@ export const formatData = (data: Orders, config: DataConfig): FormattedData => {
   };
 };
 
-const ProductSalesByStateTable = (): JSX.Element => {
+const ProductSalesByStateTable = ({ toggleTheme }: { toggleTheme: () => void }): JSX.Element => {
   const dispatch = useDispatch();
   const [formattedData, setFormattedData] = useState<FormattedData>();
   const ordersRemoteVal = useSelector((state: AppState) => state.orders);
@@ -169,10 +169,9 @@ const ProductSalesByStateTable = (): JSX.Element => {
       rowSubKeyTitle: camelToSentenceCase(rowSubKey),
       subResultText: 'Total',
       finalResultText: 'Grand Total',
-      highlightLastColumn: true,
       metric: colMetric
     };
-    return <PivotTable config={config} data={formattedData} />;
+    return <PivotTable config={config} data={formattedData} toggleTheme={toggleTheme} />;
   }
 
   return <Loader />;

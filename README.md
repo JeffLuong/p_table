@@ -66,7 +66,6 @@ While working on this project, there were a few assumptions made:
 	- `discount`
 
 ### Next steps / areas to improve:
-- Implement [styled-components](https://styled-components.com/) for isolated component styling and theming (for Dark Mode)
 - Use more semantic HTML for table (`table`, `thead`, `tbody`, `tr`, etc.)
 - Implement "sticky" column header so when a user scrolls down, the user can still see what dimension the metric belongs to.
 - Adjust formatting data algorithm to allow for other operations (multiply, average, etc.)

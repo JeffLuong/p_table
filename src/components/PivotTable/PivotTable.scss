@@ -6,19 +6,18 @@ $white: #ffffff;
   $table-name__height: 65px;
   $header__background-color: #032873;
   $row-dim__width: 25rem;
-  $row-dim-sub-result__background-color: #eeeeee;
-  $row-dim-sub-result__border-color: #dddddd;
-  $row-dim-final-result__background-color: #333333;
   $col-title-text__color: #b3bed5;
   $font-weight-heavy: 700;
 
   .TableName {
     background-color: #02205c;
+    display: flex;
+    height: $table-name__height;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
 
     > h1 {
       color: #ffffff;
-      height: $table-name__height;
-      padding: 1rem 1.5rem;
       text-align: left;
       text-transform: uppercase;
     }
@@ -27,16 +26,6 @@ $white: #ffffff;
   .Table {
     display: flex;
     width: 100%;
-
-    .TableRowSubResult {
-      background-color: $row-dim-sub-result__background-color;
-      border-top: 1px solid $row-dim-sub-result__border-color;
-      border-bottom: 1px solid $row-dim-sub-result__border-color;
-
-      &.isHighlighted {
-        background-color: #d6d6d6
-      }
-    }
 
     .TableRowKeys {
       box-shadow: 0px 16px 16px 0px rgba(0, 0, 0, .25);
@@ -51,7 +40,7 @@ $white: #ffffff;
       .TableBody {
         grid-area: row-keys;
     
-        .TableColumnTitleGroup {
+        .TableColumnTitleGroup > .Cell {
           background-color: $header__background-color;
         }
       }
@@ -95,16 +84,10 @@ $white: #ffffff;
     }
 
     .TableRowFinalResult {
-      background-color: $row-dim-final-result__background-color;
       grid-area: row-total;
 
       > span {
         color: $white;
-        font-weight: $font-weight-heavy;
-      }
-
-      &.isHighlighted {
-        background-color: #0f0f0f;
       }
     }
 
@@ -163,11 +146,6 @@ $white: #ffffff;
       > .Cell {
         width: 50%;
       }
-    }
-
-    &.isHighlighted {
-      background-color: #f2f2f2;
-      font-weight: $font-weight-heavy;
     }
   }
 }
