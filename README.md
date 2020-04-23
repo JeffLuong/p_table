@@ -69,4 +69,3 @@ While working on this project, there were a few assumptions made:
 - Use more semantic HTML for table (`table`, `thead`, `tbody`, `tr`, etc.)
 - Implement "sticky" column header so when a user scrolls down, the user can still see what dimension the metric belongs to.
 - Adjust formatting data algorithm to allow for other operations (multiply, average, etc.)
-- Adjust formatting data algorithm to allow for sorting of dimensions.

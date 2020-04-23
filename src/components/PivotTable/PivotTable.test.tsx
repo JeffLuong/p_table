@@ -9,11 +9,11 @@ const rows: [string, string[]][] = [
   ['Vehicles', ['Sedan', 'Minivan', 'Pickup Truck', 'Sport']],
 ];
 
-const expectedRowVals: [string, string[]][] = [
-  ['Homes', ['Condo', 'Townhouse', 'Semi-detached', 'Detached', 'Trailer', 'Homes Total']],
-  ['Jobs', ['Engineer', 'Designer', 'Product Manager', 'Marketer', 'Customer Success', 'People Operations', 'Jobs Total']],
-  ['Vehicles', ['Sedan', 'Minivan', 'Pickup Truck', 'Sport', 'Vehicles Total']],
-];
+const expectedRowVals: [string, string[]][] = JSON.parse(JSON.stringify(rows))
+.map((row: [string, string[]]) => {
+  row[1].push(`${row[0]} Total`);
+  return row;
+});
 
 const columns: [string | number, number[][]][] = [
   ['Condo', [
@@ -44,11 +44,6 @@ describe('<PivotTable>', () => {
           expect(val && val.props.children).toBe(s);
           valIdx += 1;
         });
-      });
-
-      wrapper.find('TableRowSubResult').forEach((w, i) => {
-        const resultText = w.dive().find('span').text();
-        expect(resultText).toBe(`${rows[i][0]} ${rowSubResultText}`);
       });
     });
   });

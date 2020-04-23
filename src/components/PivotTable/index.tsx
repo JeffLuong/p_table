@@ -2,7 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import styled, { DefaultTheme, ThemeConsumer } from 'styled-components';
 import type { FormattedData, ColumnMetrics, RowKeyValues } from '../ProductSalesByStateTable';
-import { LightTheme, DarkTheme } from '../../Theme';
+import { LightTheme } from '../../Theme';
 import './PivotTable.scss';
 
 type PivotTableProps = {
@@ -124,7 +124,7 @@ const TableBody = ({ children }: TDefProps): JSX.Element => <div className="Tabl
 const TableRowKeys = ({ children }: TDefProps): JSX.Element => <div className="TableRowKeys">{children}</div>;
 
 const BaseTableRowSubResult = ({ children, className }: TDefProps): JSX.Element => {
-  return <Cell className={cx('TableRowSubResult', className)}><Span>{children}</Span></Cell>;
+  return <Cell className={cx('TableRowSubResult', className)}>{children}</Cell>;
 };
 
 const TableRowSubResult = styled(BaseTableRowSubResult)`
