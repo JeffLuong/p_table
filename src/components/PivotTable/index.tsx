@@ -2,6 +2,7 @@ import * as React from 'react';
 import cx from 'classnames';
 import styled, { DefaultTheme, ThemeConsumer } from 'styled-components';
 import type { FormattedData, ColumnMetrics, RowKeyValues } from '../ProductSalesByStateTable';
+import { LightTheme, DarkTheme } from '../../Theme';
 import './PivotTable.scss';
 
 type PivotTableProps = {
@@ -102,7 +103,7 @@ const TableContainer = styled(BaseTableContainer)`
   background-color: ${({ theme }: ThemedProps): string => theme.tableBg};
 `;
 
-const Span = styled.span`
+export const Span = styled.span`
   color: ${({ theme }: ThemedProps): string => theme.text.body};
 `;
 
@@ -133,7 +134,6 @@ const TableRowSubResult = styled(BaseTableRowSubResult)`
 
       &.isHighlighted {
         background-color: ${theme.cell.primaryHighlightBg};
-        content: 'SUB-RESULT';
         font-weight: 700;
       }
     `;
@@ -148,7 +148,6 @@ const TableRowFinalResult = styled(BaseTableRowFinalResult)`
   ${({ theme }: ThemedProps): string => {
     return `
       background-color: ${theme.cell.secondaryHighlightBg};
-      content: 'FINAL-RESULT';
 
       &.isHighlighted {
         background-color: ${theme.cell.secondaryHighlightBg};
@@ -256,7 +255,7 @@ const PivotTable = ({ data, config, toggleTheme }: PivotTableProps): JSX.Element
             <h1>Sum of {metric}</h1>
             <div>
               <Button onClick={toggleTheme}>
-                Toggle Theme
+                {theme === LightTheme ? 'Dark Mode' : 'Light Mode'}
               </Button>
             </div>
           </TableName>
