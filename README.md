@@ -15,7 +15,7 @@ After all dependencies, you can run it locally by running:
 ```
 yarn start
 ```
-This should automatically run the client server while building all styles as well as watch for any changes made to the code.
+This will run the development build of the client on `localhost:3000`, all while compiling styles as well as watch for any changes made to the code.
 
 ### Running tests
 If you want to run linting and unit tests, you can do so by running:
